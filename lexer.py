@@ -14,12 +14,14 @@ class Lexer:
         return ch
 
     def peek(self):
+        if self.curr >= len(self.source):
+            return '\0'
         return self.source[self.curr]
 
     def lookahead(self,n=1):
-        if self.curr >= len(self.source):
+        if self.curr+n >= len(self.source):
             return '\0'
-        return self.source[self.start + n]
+        return self.source[self.curr + n]
 
     def match(self,expected):
         if self.curr >= len(self.source):
@@ -28,6 +30,31 @@ class Lexer:
             return False
         self.curr += 1
         return True
+
+    def handle_string(self,start_quote):
+        while self.peek()!=start_quote and self.curr < len(self.source):
+            self.advance()
+        if self.curr >= len(self.source) :
+            raise SyntaxError('[Line {self.line}] unterminate string')
+        self.advance()
+        self.add_token(TOK_STRING)
+
+    def handle_number(self):
+        while self.peek().isdigit():
+            self.advance()
+        if self.peek() == '.' and self.lookahead().isdigit():
+            self.advance()
+            while self.peek().isdigit():
+                self.advance()
+            self.add_token(TOK_FLOAT)
+        else:
+            self.add_token(TOK_INTEGER)
+
+    def handle_identifier(self):
+        while self.peek().isalnum() or self.peek() == '_':
+            self.advance()
+        self.add_token(TOK_IDENTIFIER)
+
 
     def add_token(self, token_type):
         self.tokens.append(Token(token_type,self.source[self.start:self.curr],self.line))
@@ -102,11 +129,17 @@ class Lexer:
                     self.add_token(TOK_ASSIGN)
                 else:
                     self.add_token(TOK_COLON)
-
-
-
-
+            elif ch.isdigit():
+                self.handle_number()
+            elif ch == "'" :
+                self.handle_string("'")
+            elif ch == '"' :
+                self.handle_string('"')
+            elif ch.isalpha() or ch == '_':
+                self.handle_identifier()
         return self.tokens
+
+
 
 
 
