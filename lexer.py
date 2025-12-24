@@ -17,6 +17,8 @@ class Lexer:
         return self.source[self.curr]
 
     def lookahead(self,n=1):
+        if self.curr >= len(self.source):
+            return '\0'
         return self.source[self.start + n]
 
     def match(self,expected):
@@ -43,7 +45,7 @@ class Lexer:
             elif ch == '\r':
                 pass
             elif ch == '#':
-                while self.peek() != '\n':
+                while self.peek() != '\n' and not(self.curr>=len(self.source)):
                     self.advance()
             elif ch == '(':
                 self.add_token(TOK_LPAREN)
@@ -77,6 +79,33 @@ class Lexer:
                 self.add_token(TOK_QUESTION)
             elif ch == '%':
                 self.add_token(TOK_MOD)
+            elif ch == '=':
+                if self.match('='):
+                    self.add_token(TOK_EQ)
+            elif ch == '~':
+                if self.match('='):
+                    self.add_token(TOK_NE)
+                else:
+                    self.add_token(TOK_NOT)
+            elif ch == '<':
+                if self.match('='):
+                    self.add_token(TOK_LE)
+                else:
+                    self.add_token(TOK_LT)
+            elif ch == '>':
+                if self.match('='):
+                    self.add_token(TOK_GE)
+                else:
+                    self.add_token(TOK_GT)
+            elif ch == ':':
+                if self.match('='):
+                    self.add_token(TOK_ASSIGN)
+                else:
+                    self.add_token(TOK_COLON)
+
+
+
+
         return self.tokens
 
 
