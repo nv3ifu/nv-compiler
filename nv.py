@@ -1,7 +1,7 @@
-import sys
-
+from interpreter import *
 from parser import *
 from utils import *
+from lexer import *
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
@@ -20,10 +20,14 @@ if __name__ == "__main__":
         print(f'{Colors.GREEN}***************************************{Colors.WHITE}')
         tokens = Lexer(source).tokenize()
         for tok in tokens: print(tok)
-
-        print()
         print(f'{Colors.GREEN}***************************************{Colors.WHITE}')
         print(f'{Colors.GREEN}AST:{Colors.WHITE}')
         print(f'{Colors.GREEN}***************************************{Colors.WHITE}')
         ast = Parser(tokens).parse()
         print_pretty_ast(ast)
+        print(f'{Colors.GREEN}***************************************{Colors.WHITE}')
+        print(f'{Colors.GREEN}INTERPRETER:{Colors.WHITE}')
+        print(f'{Colors.GREEN}***************************************{Colors.WHITE}')
+        interpreter = Interpreter()
+        val = interpreter.interpreter(ast)
+        print(val)
