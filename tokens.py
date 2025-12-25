@@ -49,6 +49,25 @@ TOK_PRINT      = 'TOK_PRINT'
 TOK_PRINTLN    = 'TOK_PRINTLN'
 TOK_RET        = 'TOK_RET'
 
+keywords = {
+  'if'      : TOK_IF,
+  'else'    : TOK_ELSE,
+  'then'    : TOK_THEN,
+  'true'    : TOK_TRUE,
+  'false'   : TOK_FALSE,
+  'and'     : TOK_AND,
+  'or'      : TOK_OR,
+  'while'   : TOK_WHILE,
+  'do'      : TOK_DO,
+  'for'     : TOK_FOR,
+  'func'    : TOK_FUNC,
+  'null'    : TOK_NULL,
+  'end'     : TOK_END,
+  'print'   : TOK_PRINT,
+  'println' : TOK_PRINTLN,
+  'ret'     : TOK_RET,
+}
+
 class Token:
     def __init__(self,token_type,lexeme,line):
         self.token_type = token_type

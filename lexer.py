@@ -53,8 +53,12 @@ class Lexer:
     def handle_identifier(self):
         while self.peek().isalnum() or self.peek() == '_':
             self.advance()
-        self.add_token(TOK_IDENTIFIER)
-
+        text = self.source[self.start:self.curr]
+        keyword_type = keywords.get(text)
+        if keyword_type:
+            self.add_token(keyword_type)
+        else:
+            self.add_token(TOK_IDENTIFIER)
 
     def add_token(self, token_type):
         self.tokens.append(Token(token_type,self.source[self.start:self.curr],self.line))
@@ -71,9 +75,6 @@ class Lexer:
                 pass
             elif ch == '\r':
                 pass
-            elif ch == '#':
-                while self.peek() != '\n' and not(self.curr>=len(self.source)):
-                    self.advance()
             elif ch == '(':
                 self.add_token(TOK_LPAREN)
             elif ch == ')':
@@ -93,7 +94,11 @@ class Lexer:
             elif ch == '+':
                 self.add_token(TOK_PLUS)
             elif ch == '-':
-                self.add_token(TOK_MINUS)
+                if self.match('-') :
+                    while self.peek() != '\n' and not (self.curr >= len(self.source)):
+                        self.advance()
+                else:
+                    self.add_token(TOK_MINUS)
             elif ch == '*':
                 self.add_token(TOK_STAR)
             elif ch == '^':
@@ -137,6 +142,7 @@ class Lexer:
                 self.handle_string('"')
             elif ch.isalpha() or ch == '_':
                 self.handle_identifier()
+
         return self.tokens
 
 
