@@ -1,10 +1,7 @@
-from tokens import *
-from lexer import *
-from parser import *
-from utils import *
 import sys
 
-
+from parser import *
+from utils import *
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
@@ -30,4 +27,3 @@ if __name__ == "__main__":
         print(f'{Colors.GREEN}***************************************{Colors.WHITE}')
         ast = Parser(tokens).parse()
         print_pretty_ast(ast)
-

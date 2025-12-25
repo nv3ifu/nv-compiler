@@ -1,6 +1,7 @@
 from tokens import *
 from utils import lexing_error
 
+
 class Lexer:
     def __init__(self, source):
         self.source = source
@@ -19,12 +20,12 @@ class Lexer:
             return '\0'
         return self.source[self.curr]
 
-    def lookahead(self,n=1):
-        if self.curr+n >= len(self.source):
+    def lookahead(self, n=1):
+        if self.curr + n >= len(self.source):
             return '\0'
         return self.source[self.curr + n]
 
-    def match(self,expected):
+    def match(self, expected):
         if self.curr >= len(self.source):
             return False
         if self.source[self.curr] != expected:
@@ -32,10 +33,10 @@ class Lexer:
         self.curr += 1
         return True
 
-    def handle_string(self,start_quote):
-        while self.peek()!=start_quote and self.curr < len(self.source):
+    def handle_string(self, start_quote):
+        while self.peek() != start_quote and self.curr < len(self.source):
             self.advance()
-        if self.curr >= len(self.source) :
+        if self.curr >= len(self.source):
             lexing_error('Unterminated string', self.line)
         self.advance()
         self.add_token(TOK_STRING)
@@ -62,7 +63,7 @@ class Lexer:
             self.add_token(TOK_IDENTIFIER)
 
     def add_token(self, token_type):
-        self.tokens.append(Token(token_type,self.source[self.start:self.curr],self.line))
+        self.tokens.append(Token(token_type, self.source[self.start:self.curr], self.line))
 
     def tokenize(self):
         while self.curr < len(self.source):
@@ -95,7 +96,7 @@ class Lexer:
             elif ch == '+':
                 self.add_token(TOK_PLUS)
             elif ch == '-':
-                if self.match('-') :
+                if self.match('-'):
                     while self.peek() != '\n' and not (self.curr >= len(self.source)):
                         self.advance()
                 else:
@@ -139,18 +140,12 @@ class Lexer:
                     self.add_token(TOK_COLON)
             elif ch.isdigit():
                 self.handle_number()
-            elif ch == "'" :
+            elif ch == "'":
                 self.handle_string("'")
-            elif ch == '"' :
+            elif ch == '"':
                 self.handle_string('"')
             elif ch.isalpha() or ch == '_':
                 self.handle_identifier()
             else:
                 lexing_error(f'Unexpected character: {ch}', self.line)
         return self.tokens
-
-
-
-
-
-
