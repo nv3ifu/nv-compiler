@@ -18,11 +18,12 @@ TOK_QUESTION   = 'TOK_QUESTION'   #  ?
 TOK_NOT        = 'TOK_NOT'        #  ~
 TOK_GT         = 'TOK_GT'         #  >
 TOK_LT         = 'TOK_LT'         #  <
+TOK_EQ         = 'TOK_EQ'         #  =
 # Two-char tokens
 TOK_GE         = 'TOK_GE'         #  >=
 TOK_LE         = 'TOK_LE'         #  <=
 TOK_NE         = 'TOK_NE'         #  ~=
-TOK_EQ         = 'TOK_EQ'         #  ==
+TOK_EQEQ         = 'TOK_EQEQ'         #  ==
 TOK_ASSIGN     = 'TOK_ASSIGN'     #  :=
 TOK_GTGT       = 'TOK_GTGT'       #  >>
 TOK_LTLT       = 'TOK_LTLT'       #  <<
