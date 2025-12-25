@@ -1,7 +1,10 @@
 from tokens import *
 from lexer import *
 from parser import *
+from utils import *
 import sys
+
+
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
@@ -10,11 +13,21 @@ if __name__ == "__main__":
     print(filename)
     with open(filename) as f:
         source = f.read()
-        print("LEXER:")
+        print(f'{Colors.GREEN}***************************************{Colors.WHITE}')
+        print(f'{Colors.GREEN}SOURCE:{Colors.WHITE}')
+        print(f'{Colors.GREEN}***************************************{Colors.WHITE}')
+        print(source)
+
+        print(f'{Colors.GREEN}***************************************{Colors.WHITE}')
+        print(f'{Colors.GREEN}TOKENS:{Colors.WHITE}')
+        print(f'{Colors.GREEN}***************************************{Colors.WHITE}')
         tokens = Lexer(source).tokenize()
-        for token in tokens:
-            print(token)
-        print("PARSED AST:")
+        for tok in tokens: print(tok)
+
+        print()
+        print(f'{Colors.GREEN}***************************************{Colors.WHITE}')
+        print(f'{Colors.GREEN}AST:{Colors.WHITE}')
+        print(f'{Colors.GREEN}***************************************{Colors.WHITE}')
         ast = Parser(tokens).parse()
-        print(ast)
+        print_pretty_ast(ast)
 
