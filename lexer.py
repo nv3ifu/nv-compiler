@@ -142,7 +142,8 @@ class Lexer:
                 self.handle_string('"')
             elif ch.isalpha() or ch == '_':
                 self.handle_identifier()
-
+            else:
+                raise SyntaxError(f'Error at {ch} line {self.line} : Unexpected character')
         return self.tokens
 
 
