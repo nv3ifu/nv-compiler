@@ -48,7 +48,7 @@ def print_pretty_ast(ast_text):
 
 
 def print_tree(node, prefix="", is_last=True, label=""):
-    from model import Integer, Float, String, Bool, Grouping, UnOp, BinOp
+    from model import Integer, Float, String, Bool, Grouping, UnOp, BinOp, Identifier, Assignment
     
     connector = "└── " if is_last else "├── "
     label_str = f"{label}: " if label else ""
@@ -61,6 +61,13 @@ def print_tree(node, prefix="", is_last=True, label=""):
         print(f"{prefix}{connector}{label_str}String({node.value!r})")
     elif isinstance(node, Bool):
         print(f"{prefix}{connector}{label_str}Bool({node.value})")
+    elif isinstance(node, Identifier):
+        print(f"{prefix}{connector}{label_str}Identifier({node.name})")
+    elif isinstance(node, Assignment):
+        print(f"{prefix}{connector}{label_str}Assignment")
+        new_prefix = prefix + ("    " if is_last else "│   ")
+        print(f"{new_prefix}├── name: {node.name}")
+        print_tree(node.value, new_prefix, True, "value")
     elif isinstance(node, Grouping):
         print(f"{prefix}{connector}{label_str}Grouping")
         new_prefix = prefix + ("    " if is_last else "│   ")
@@ -81,7 +88,7 @@ def print_tree(node, prefix="", is_last=True, label=""):
 def generate_ast_image(node, filename="ast"):
     try:
         from graphviz import Digraph
-        from model import Integer, Float, String, Bool, Grouping, UnOp, BinOp
+        from model import Integer, Float, String, Bool, Grouping, UnOp, BinOp, Identifier, Assignment
     except ImportError:
         print("plz install graphviz: pip install graphviz")
         return
@@ -101,6 +108,11 @@ def generate_ast_image(node, filename="ast"):
             dot.node(node_id, f"String\n{n.value!r}", shape="ellipse", style="filled", fillcolor="lightyellow")
         elif isinstance(n, Bool):
             dot.node(node_id, f"Bool\n{n.value}", shape="ellipse", style="filled", fillcolor="lightgreen")
+        elif isinstance(n, Identifier):
+            dot.node(node_id, f"Identifier\n{n.name}", shape="ellipse", style="filled", fillcolor="lightcyan")
+        elif isinstance(n, Assignment):
+            dot.node(node_id, f"Assignment\n{n.name}", shape="box", style="filled", fillcolor="plum")
+            add_node(n.value, node_id, "value")
         elif isinstance(n, Grouping):
             dot.node(node_id, "()", shape="box", style="filled", fillcolor="lightgray")
             add_node(n.value, node_id)

@@ -15,6 +15,14 @@ class Expr(Node):
     """
     pass
 
+class Identifier(Expr):
+    def __init__(self, name, line):
+        self.name = name
+        self.line = line
+
+    def __repr__(self):
+        return f'Identifier[{self.name}]'
+
 
 class Integer(Expr):
     def __init__(self, value, line):
@@ -98,17 +106,23 @@ class BinOp(Expr):
         return f'BinOp({self.op.lexeme!r},{self.left},{self.right})'
 
 
-def WhileStmt(Stmt):
+class WhileStmt(Stmt):
     pass
 
 
-def Assignment(Stmt):
+class Assignment(Stmt):
+    def __init__(self, name, value, line):
+        self.name = name
+        self.value = value
+        self.line = line
+
+    def __repr__(self):
+        return f'Assignment({self.name}, {self.value})'
+
+
+class IfStmt(Stmt):
     pass
 
 
-def IfStmt(Stmt):
-    pass
-
-
-def ForStmt(Stmt):
+class ForStmt(Stmt):
     pass
