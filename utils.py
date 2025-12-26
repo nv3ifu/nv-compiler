@@ -48,7 +48,7 @@ def print_pretty_ast(ast_text):
 
 
 def print_tree(node, prefix="", is_last=True, label=""):
-    from model import Integer, Float, String, Bool, Grouping, UnOp, BinOp, Identifier, Assignment
+    from model import Integer, Float, String, Bool, Grouping, UnOp, BinOp, Identifier, Assignment, LogicalOp
     
     connector = "└── " if is_last else "├── "
     label_str = f"{label}: " if label else ""
@@ -76,6 +76,11 @@ def print_tree(node, prefix="", is_last=True, label=""):
         print(f"{prefix}{connector}{label_str}UnOp({node.op.lexeme!r})")
         new_prefix = prefix + ("    " if is_last else "│   ")
         print_tree(node.operand, new_prefix, True)
+    elif isinstance(node, LogicalOp):
+        print(f"{prefix}{connector}{label_str}LogicalOp({node.op.lexeme!r})")
+        new_prefix = prefix + ("    " if is_last else "│   ")
+        print_tree(node.left, new_prefix, False, "left")
+        print_tree(node.right, new_prefix, True, "right")
     elif isinstance(node, BinOp):
         print(f"{prefix}{connector}{label_str}BinOp({node.op.lexeme!r})")
         new_prefix = prefix + ("    " if is_last else "│   ")
@@ -88,7 +93,7 @@ def print_tree(node, prefix="", is_last=True, label=""):
 def generate_ast_image(node, filename="ast"):
     try:
         from graphviz import Digraph
-        from model import Integer, Float, String, Bool, Grouping, UnOp, BinOp, Identifier, Assignment
+        from model import Integer, Float, String, Bool, Grouping, UnOp, BinOp, Identifier, Assignment, LogicalOp
     except ImportError:
         print("plz install graphviz: pip install graphviz")
         return
@@ -119,6 +124,10 @@ def generate_ast_image(node, filename="ast"):
         elif isinstance(n, UnOp):
             dot.node(node_id, f"UnOp\n{n.op.lexeme!r}", shape="circle", style="filled", fillcolor="lightsalmon")
             add_node(n.operand, node_id)
+        elif isinstance(n, LogicalOp):
+            dot.node(node_id, f"LogicalOp\n{n.op.lexeme!r}", shape="diamond", style="filled", fillcolor="lightpink")
+            add_node(n.left, node_id, "L")
+            add_node(n.right, node_id, "R")
         elif isinstance(n, BinOp):
             dot.node(node_id, f"BinOp\n{n.op.lexeme!r}", shape="circle", style="filled", fillcolor="lightsalmon")
             add_node(n.left, node_id, "L")
