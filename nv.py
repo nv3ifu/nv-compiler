@@ -29,5 +29,5 @@ if __name__ == "__main__":
         print(f'{Colors.GREEN}INTERPRETER:{Colors.WHITE}')
         print(f'{Colors.GREEN}***************************************{Colors.WHITE}')
         interpreter = Interpreter()
-        val = interpreter.interpreter(ast)
+        _,val = interpreter.interpret(ast)
         print(val)

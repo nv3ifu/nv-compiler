@@ -19,6 +19,10 @@ def parse_error(message, lineno):
     print(f'{Colors.RED}[Line {lineno}]: {message}{Colors.WHITE}')
     sys.exit(1)
 
+def runtime_error(message, lineno):
+    print(f'{Colors.RED}[Line {lineno}]: {message}{Colors.WHITE}')
+    sys.exit(1)
+
 
 def print_pretty_ast(ast_text):
     i = 0

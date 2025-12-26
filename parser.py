@@ -41,6 +41,9 @@ class Parser:
         return True
 
     def primary(self):
+        if self.match(TOK_TRUE): return Bool(True, line=self.previous_token().line)
+        if self.match(TOK_FALSE): return Bool(False, line=self.previous_token().line)
+        if self.match(TOK_STRING): return String(str(self.previous_token().lexeme[1:-1]), line=self.previous_token().line)
         if self.match(TOK_INTEGER): return Integer(int(self.previous_token().lexeme), line=self.previous_token().line)
         if self.match(TOK_FLOAT): return Float(float(self.previous_token().lexeme), line=self.previous_token().line)
         if self.match(TOK_LPAREN):
