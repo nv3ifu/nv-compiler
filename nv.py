@@ -1,7 +1,7 @@
 from interpreter import *
+from lexer import *
 from parser import *
 from utils import *
-from lexer import *
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
@@ -30,5 +30,4 @@ if __name__ == "__main__":
         print(f'{Colors.GREEN}INTERPRETER:{Colors.WHITE}')
         print(f'{Colors.GREEN}***************************************{Colors.WHITE}')
         interpreter = Interpreter()
-        _,val = interpreter.interpret(ast)
-        print(val)
+        interpreter.interpret(ast)

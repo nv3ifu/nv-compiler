@@ -15,6 +15,7 @@ class Expr(Node):
     """
     pass
 
+
 class Identifier(Expr):
     def __init__(self, name, line):
         self.name = name
@@ -43,6 +44,7 @@ class Float(Expr):
     def __repr__(self):
         return f'Float[{self.value}]'
 
+
 class Bool(Expr):
     def __init__(self, value, line):
         assert isinstance(value, bool), value
@@ -51,6 +53,7 @@ class Bool(Expr):
 
     def __repr__(self):
         return f'Bool[{self.value}]'
+
 
 class String(Expr):
     def __init__(self, value, line):
@@ -86,6 +89,7 @@ class UnOp(Expr):
 
     def __repr__(self):
         return f'BinOp({self.op.lexeme!r},{self.operand})'
+
 
 class LogicalOp(Expr):
 
@@ -133,6 +137,26 @@ class Assignment(Stmt):
     def __repr__(self):
         return f'Assignment({self.name}, {self.value})'
 
+
+class Stmts(Node):
+    def __init__(self, stmts, line):
+        assert all(isinstance(stmt, Stmt) for stmt in stmts), stmts
+        self.stmts = stmts
+        self.line = line
+
+    def __repr__(self):
+        return f'Stmts({self.stmts})'
+
+
+class PrintStmt(Stmt):
+    def __init__(self, value, line,end):
+        assert isinstance(value, Expr), value
+        self.value = value
+        self.line = line
+        self.end = end
+
+    def __repr__(self):
+        return f'PrintStmt({self.value},end = {self.end!r})'
 
 class IfStmt(Stmt):
     pass

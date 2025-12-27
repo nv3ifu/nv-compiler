@@ -1,6 +1,7 @@
 from model import *
-from utils import *
 from tokens import *
+from utils import *
+
 
 class Parser:
     def __init__(self, tokens):
@@ -43,7 +44,8 @@ class Parser:
     def primary(self):
         if self.match(TOK_TRUE): return Bool(True, line=self.previous_token().line)
         if self.match(TOK_FALSE): return Bool(False, line=self.previous_token().line)
-        if self.match(TOK_STRING): return String(str(self.previous_token().lexeme[1:-1]), line=self.previous_token().line)
+        if self.match(TOK_STRING): return String(str(self.previous_token().lexeme[1:-1]),
+                                                 line=self.previous_token().line)
         if self.match(TOK_INTEGER): return Integer(int(self.previous_token().lexeme), line=self.previous_token().line)
         if self.match(TOK_FLOAT): return Float(float(self.previous_token().lexeme), line=self.previous_token().line)
         if self.match(TOK_IDENTIFIER): return Identifier(self.previous_token().lexeme, line=self.previous_token().line)
@@ -109,7 +111,6 @@ class Parser:
             expr = BinOp(op, expr, right, line=op.line)
         return expr
 
-
     def logical_and(self):
         expr = self.equality()
         while self.match(TOK_AND):
@@ -138,8 +139,52 @@ class Parser:
         return expr
 
     def expr(self):
-        return self.assignment()
+        return self.logical_or()
+
+    def if_stmt(self):
+        pass
+
+    def for_stmt(self):
+        pass
+
+    def while_stmt(self):
+        pass
+
+    def print_stmt(self,end):
+        if self.match(TOK_PRINT) or self.match(TOK_PRINTLN):
+            val = self.expr()
+            return PrintStmt(val,self.previous_token().line,end)
+
+    def func_stmt(self):
+        pass
+
+    def stmt(self):
+        if self.peek().token_type == TOK_PRINT:
+            return self.print_stmt(end = '')
+        if self.peek().token_type == TOK_PRINTLN:
+            return self.print_stmt(end = '\n')
+        if self.peek().token_type == TOK_IF:
+            return self.if_stmt()
+        if self.peek().token_type == TOK_WHILE:
+            return self.while_stmt()
+        if self.peek().token_type == TOK_FOR:
+            return self.for_stmt()
+        if self.peek().token_type == TOK_FUNC:
+            return self.func_stmt()
+        else:
+            pass
+
+    def stmts(self):
+        stmts = []
+        while self.curr < len(self.tokens):
+            stmt = self.stmt()
+            stmts.append(stmt)
+        return Stmts(stmts, self.previous_token().line)
+
+    def program(self):
+        stmts = self.stmts()
+        return stmts
 
     def parse(self):
-        ast = self.expr()
+        ast = self.program()
         return ast

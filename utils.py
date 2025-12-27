@@ -19,6 +19,7 @@ def parse_error(message, lineno):
     print(f'{Colors.RED}[Line {lineno}]: {message}{Colors.WHITE}')
     sys.exit(1)
 
+
 def runtime_error(message, lineno):
     print(f'{Colors.RED}[Line {lineno}]: {message}{Colors.WHITE}')
     sys.exit(1)
@@ -48,11 +49,11 @@ def print_pretty_ast(ast_text):
 
 
 def print_tree(node, prefix="", is_last=True, label=""):
-    from model import Integer, Float, String, Bool, Grouping, UnOp, BinOp, Identifier, Assignment, LogicalOp
-    
+    from model import Integer, Float, String, Bool, Grouping, UnOp, BinOp, Identifier, Assignment, LogicalOp, Stmts, PrintStmt
+
     connector = "└── " if is_last else "├── "
     label_str = f"{label}: " if label else ""
-    
+
     if isinstance(node, Integer):
         print(f"{prefix}{connector}{label_str}Integer({node.value})")
     elif isinstance(node, Float):
@@ -86,6 +87,16 @@ def print_tree(node, prefix="", is_last=True, label=""):
         new_prefix = prefix + ("    " if is_last else "│   ")
         print_tree(node.left, new_prefix, False, "left")
         print_tree(node.right, new_prefix, True, "right")
+    elif isinstance(node, Stmts):
+        print(f"{prefix}{connector}{label_str}Stmts")
+        new_prefix = prefix + ("    " if is_last else "│   ")
+        for i, stmt in enumerate(node.stmts):
+            is_last_stmt = (i == len(node.stmts) - 1)
+            print_tree(stmt, new_prefix, is_last_stmt, f"[{i}]")
+    elif isinstance(node, PrintStmt):
+        print(f"{prefix}{connector}{label_str}PrintStmt")
+        new_prefix = prefix + ("    " if is_last else "│   ")
+        print_tree(node.value, new_prefix, True, "value")
     else:
         print(f"{prefix}{connector}{label_str}{node}")
 
@@ -93,18 +104,18 @@ def print_tree(node, prefix="", is_last=True, label=""):
 def generate_ast_image(node, filename="ast"):
     try:
         from graphviz import Digraph
-        from model import Integer, Float, String, Bool, Grouping, UnOp, BinOp, Identifier, Assignment, LogicalOp
+        from model import Integer, Float, String, Bool, Grouping, UnOp, BinOp, Identifier, Assignment, LogicalOp, Stmts, PrintStmt
     except ImportError:
         print("plz install graphviz: pip install graphviz")
         return
-    
+
     dot = Digraph(comment='AST')
     dot.attr(rankdir='TB', fontname='Consolas')
     dot.attr('node', fontname='Consolas')
-    
+
     def add_node(n, parent_id=None, edge_label=""):
         node_id = str(id(n))
-        
+
         if isinstance(n, Integer):
             dot.node(node_id, f"Integer\n{n.value}", shape="ellipse", style="filled", fillcolor="lightblue")
         elif isinstance(n, Float):
@@ -132,10 +143,17 @@ def generate_ast_image(node, filename="ast"):
             dot.node(node_id, f"BinOp\n{n.op.lexeme!r}", shape="circle", style="filled", fillcolor="lightsalmon")
             add_node(n.left, node_id, "L")
             add_node(n.right, node_id, "R")
-        
+        elif isinstance(n, Stmts):
+            dot.node(node_id, "Stmts", shape="box", style="filled", fillcolor="lavender")
+            for i, stmt in enumerate(n.stmts):
+                add_node(stmt, node_id, f"[{i}]")
+        elif isinstance(n, PrintStmt):
+            dot.node(node_id, "PrintStmt", shape="box", style="filled", fillcolor="palegreen")
+            add_node(n.value, node_id, "value")
+
         if parent_id:
             dot.edge(parent_id, node_id, label=edge_label)
-    
+
     add_node(node)
     dot.render(filename, format="png", cleanup=True)
     print(f"AST img generated: {filename}.png")
