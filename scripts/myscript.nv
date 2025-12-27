@@ -1,2 +1,5 @@
-print 1 + 2
-println("123123\n123123")
+if 2>1 then
+    println("true")
+else
+    println("false")
+end

@@ -130,5 +130,14 @@ class Interpreter:
         elif isinstance(node,PrintStmt):
             expr_type ,expr_val=self.interpret(node.value)
             print(codecs.escape_decode(bytes(str(expr_val), "utf-8"))[0].decode("utf-8"), end=node.end)
+        elif isinstance(node, IfStmt):
+            testtype,testval = self.interpret(node.test)
+            if testtype!=TYPE_BOOL:
+                runtime_error("if condition is not a bool type",node.line)
+            if testval:
+                self.interpret(node.then_stmts)
+            else:
+                self.interpret(node.else_stmts)
+
 
 

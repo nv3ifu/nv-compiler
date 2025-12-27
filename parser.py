@@ -142,7 +142,18 @@ class Parser:
         return self.logical_or()
 
     def if_stmt(self):
-        pass
+        self.expect(TOK_IF)
+        test = self.expr()
+        self.expect(TOK_THEN)
+        then_stmts = self.stmts()
+        if self.is_next(TOK_ELSE):
+            self.advance()
+            else_stmts = self.stmts()
+        else:
+            else_stmts = None
+        self.expect(TOK_END)
+        return IfStmt(test,then_stmts,else_stmts,self.previous_token().line)
+
 
     def for_stmt(self):
         pass
@@ -177,6 +188,8 @@ class Parser:
     def stmts(self):
         stmts = []
         while self.curr < len(self.tokens):
+            if self.peek().token_type in (TOK_ELSE, TOK_END):
+                break
             stmt = self.stmt()
             stmts.append(stmt)
         return Stmts(stmts, self.previous_token().line)

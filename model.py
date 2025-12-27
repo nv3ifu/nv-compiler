@@ -1,3 +1,5 @@
+from pyparsing import rest_of_line
+
 from tokens import *
 
 
@@ -159,8 +161,15 @@ class PrintStmt(Stmt):
         return f'PrintStmt({self.value},end = {self.end!r})'
 
 class IfStmt(Stmt):
-    pass
 
-
+    def __init__(self,test,then_stmts,else_stmts,line):
+        assert isinstance(test,Expr),test
+        assert isinstance(then_stmts,Stmts),then_stmts
+        assert isinstance(else_stmts,Stmts),else_stmts
+        self.test = test
+        self.then_stmts = then_stmts
+        self.else_stmts = else_stmts
+    def __repr__(self):
+        return f'IfStmt(test:{self.test},then_stmts:{self.then_stmts},else_stmts{self.else_stmts})'
 class ForStmt(Stmt):
     pass
