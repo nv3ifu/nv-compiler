@@ -1,5 +1,2 @@
-if 2>1 then
-    println("true")
-else
-    println("false")
-end
+x := 0
+x := x+1

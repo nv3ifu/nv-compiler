@@ -67,8 +67,8 @@ def print_tree(node, prefix="", is_last=True, label=""):
     elif isinstance(node, Assignment):
         print(f"{prefix}{connector}{label_str}Assignment")
         new_prefix = prefix + ("    " if is_last else "│   ")
-        print(f"{new_prefix}├── name: {node.name}")
-        print_tree(node.value, new_prefix, True, "value")
+        print_tree(node.left, new_prefix, False, "left")
+        print_tree(node.right, new_prefix, True, "right")
     elif isinstance(node, Grouping):
         print(f"{prefix}{connector}{label_str}Grouping")
         new_prefix = prefix + ("    " if is_last else "│   ")
@@ -133,8 +133,9 @@ def generate_ast_image(node, filename="ast"):
         elif isinstance(n, Identifier):
             dot.node(node_id, f"Identifier\n{n.name}", shape="ellipse", style="filled", fillcolor="lightcyan")
         elif isinstance(n, Assignment):
-            dot.node(node_id, f"Assignment\n{n.name}", shape="box", style="filled", fillcolor="plum")
-            add_node(n.value, node_id, "value")
+            dot.node(node_id, "Assignment", shape="box", style="filled", fillcolor="plum")
+            add_node(n.left, node_id, "left")
+            add_node(n.right, node_id, "right")
         elif isinstance(n, Grouping):
             dot.node(node_id, "()", shape="box", style="filled", fillcolor="lightgray")
             add_node(n.value, node_id)

@@ -56,6 +56,7 @@ class Parser:
             else:
                 return Grouping(expr, line=self.previous_token().line)
 
+
     def exponent(self):
         expr = self.primary()
         if self.match(TOK_CARET):
@@ -128,15 +129,15 @@ class Parser:
         return expr
 
     def assignment(self):
-        expr = self.logical_or()
+        left = self.expr()
         if self.match(TOK_ASSIGN):
             op = self.previous_token()
-            value = self.assignment()
-            if isinstance(expr, Identifier):
-                return Assignment(expr.name, value, line=op.line)
+            right = self.expr()
+            if isinstance(left, Identifier):
+                return Assignment(left, right, line=op.line)
             else:
-                parse_error(f"Invalid assignment target {expr}", op.line)
-        return expr
+                parse_error(f"Invalid assignment target {left}", op.line)
+        return left
 
     def expr(self):
         return self.logical_or()
@@ -183,7 +184,7 @@ class Parser:
         if self.peek().token_type == TOK_FUNC:
             return self.func_stmt()
         else:
-            pass
+            return self.assignment()
 
     def stmts(self):
         stmts = []

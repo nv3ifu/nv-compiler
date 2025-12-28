@@ -131,13 +131,15 @@ class WhileStmt(Stmt):
 
 
 class Assignment(Stmt):
-    def __init__(self, name, value, line):
-        self.name = name
-        self.value = value
+    def __init__(self, left, right, line):
+        assert isinstance(left, Expr), left
+        assert isinstance(right, Expr), right
+        self.left = left
+        self.right = right
         self.line = line
 
     def __repr__(self):
-        return f'Assignment({self.name}, {self.value})'
+        return f'Assignment({self.left}, {self.right})'
 
 
 class Stmts(Node):
