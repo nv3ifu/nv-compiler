@@ -127,7 +127,15 @@ class BinOp(Expr):
 
 
 class WhileStmt(Stmt):
-    pass
+    def __init__(self,test,body_stmts,line):
+        assert isinstance(test,Expr),test
+        assert isinstance(body_stmts,Stmts),body_stmts
+        self.test = test
+        self.body_stmts = body_stmts
+        self.line = line
+    def __repr__(self):
+        return f'WhileStmt({self.test},{self.body_stmts})'
+
 
 
 class Assignment(Stmt):

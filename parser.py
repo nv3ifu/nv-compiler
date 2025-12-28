@@ -160,7 +160,12 @@ class Parser:
         pass
 
     def while_stmt(self):
-        pass
+        self.expect(TOK_WHILE)
+        test = self.expr()
+        self.expect(TOK_DO)
+        body_stmts = self.stmts()
+        self.expect(TOK_END)
+        return WhileStmt(test,body_stmts,self.previous_token().line)
 
     def print_stmt(self,end):
         if self.match(TOK_PRINT) or self.match(TOK_PRINTLN):

@@ -1,4 +1,5 @@
 from model import *
+from state import *
 from tokens import *
 from utils import *
 import codecs
@@ -11,7 +12,7 @@ TYPE_BOOL = 'TYPE_BOOL'  # true | false
 
 
 class Interpreter:
-    def interpret(self, node):
+    def interpret(self, node,env):
         if isinstance(node, Integer):
             return (TYPE_NUMBER, float(node.value))
         elif isinstance(node, Float):
@@ -21,10 +22,20 @@ class Interpreter:
         elif isinstance(node, Bool):
             return (TYPE_BOOL, node.value)
         elif isinstance(node, Grouping):
-            return self.interpret(node.value)
+            return self.interpret(node.value,env)
+        elif isinstance(node, Identifier):
+            value = env.get_var(node.name)
+            if value is None:
+                runtime_error(f'Undefined variable {node.name!r}.', node.line)
+            if value[1] is None:
+                runtime_error(f'Uninitialized variable {node.name!r}.', node.line)
+            return value
+        elif isinstance(node, Assignment):
+            righttype, rightval = self.interpret(node.right,env)
+            env.set_var(node.left.name,(righttype,rightval))
         elif isinstance(node, BinOp):
-            lefttype, leftval = self.interpret(node.left)
-            righttype, rightval = self.interpret(node.right)
+            lefttype, leftval = self.interpret(node.left,env)
+            righttype, rightval = self.interpret(node.right,env)
             if node.op.token_type == TOK_PLUS:
                 if lefttype == TYPE_NUMBER and righttype == TYPE_NUMBER:
                     return (TYPE_NUMBER, leftval + rightval)
@@ -93,7 +104,7 @@ class Interpreter:
                 return (TYPE_BOOL, lefttype != righttype or leftval != rightval)
 
         elif isinstance(node, UnOp):
-            operandtype, operandval = self.interpret(node.operand)
+            operandtype, operandval = self.interpret(node.operand,env)
             if node.op.token_type == TOK_MINUS:
                 if operandtype == TYPE_NUMBER:
                     return (TYPE_NUMBER, -operandval)
@@ -111,33 +122,44 @@ class Interpreter:
                     runtime_error(f'Unsupported operator {node.op.lexeme!r} with {operandtype}.', node.op.line)
         elif isinstance(node, LogicalOp):
             if node.op.token_type == TOK_AND:
-                lefttype, leftval = self.interpret(node.left)
+                lefttype, leftval = self.interpret(node.left,env)
                 if not leftval:
                     return (TYPE_BOOL, False)
                 else:
-                    righttype, rightval = self.interpret(node.right)
+                    righttype, rightval = self.interpret(node.right,env)
                     return TYPE_BOOL, bool(rightval)
             elif node.op.token_type == TOK_OR:
-                lefttype, leftval = self.interpret(node.left)
+                lefttype, leftval = self.interpret(node.left,env)
                 if leftval:
                     return (TYPE_BOOL, True)
                 else:
-                    righttype, rightval = self.interpret(node.right)
+                    righttype, rightval = self.interpret(node.right,env)
                     return TYPE_BOOL, bool(rightval)
         elif isinstance(node, Stmts):
             for stmt in node.stmts:
-                self.interpret(stmt)
+                self.interpret(stmt,env)
         elif isinstance(node,PrintStmt):
-            expr_type ,expr_val=self.interpret(node.value)
+            expr_type ,expr_val=self.interpret(node.value,env)
             print(codecs.escape_decode(bytes(str(expr_val), "utf-8"))[0].decode("utf-8"), end=node.end)
         elif isinstance(node, IfStmt):
-            testtype,testval = self.interpret(node.test)
+            testtype,testval = self.interpret(node.test,env)
             if testtype!=TYPE_BOOL:
                 runtime_error("if condition is not a bool type",node.line)
             if testval:
-                self.interpret(node.then_stmts)
+                self.interpret(node.then_stmts,env.new_env())
             else:
-                self.interpret(node.else_stmts)
+                self.interpret(node.else_stmts,env.new_env())
+        elif isinstance(node, WhileStmt):
+            new_env = env.new_env()
+            while True:
+                test_type,test_val = self.interpret(node.test,env)
+                if test_type!=TYPE_BOOL:
+                    runtime_error("while condition is not a bool type",node.line)
+                if not test_val:
+                    break
+                self.interpret(node.body_stmts,new_env)
 
 
-
+    def interpret_ast(self,node):
+        env = Environment()
+        self.interpret(node,env)

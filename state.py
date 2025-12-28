@@ -1,0 +1,23 @@
+class Environment:
+    def __init__(self,parent=None):
+        self.parent = parent
+        self.var = {}
+
+    def get_var(self,name):
+        while self:
+            value = self.var.get(name)
+            if value is not None:
+                return value
+            self = self.parent
+        return None
+    def set_var(self,name,value):
+        original_env = self
+        while self:
+            if self.var.get(name) is not None:
+                self.var[name] = value
+                return value
+            self = self.parent
+        original_env.var[name] = value
+
+    def new_env(self):
+        return Environment(parent=self)

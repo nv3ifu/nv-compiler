@@ -49,7 +49,7 @@ def print_pretty_ast(ast_text):
 
 
 def print_tree(node, prefix="", is_last=True, label=""):
-    from model import Integer, Float, String, Bool, Grouping, UnOp, BinOp, Identifier, Assignment, LogicalOp, Stmts, PrintStmt, IfStmt
+    from model import Integer, Float, String, Bool, Grouping, UnOp, BinOp, Identifier, Assignment, LogicalOp, Stmts, PrintStmt, IfStmt, WhileStmt
 
     connector = "└── " if is_last else "├── "
     label_str = f"{label}: " if label else ""
@@ -93,6 +93,11 @@ def print_tree(node, prefix="", is_last=True, label=""):
         print_tree(node.test, new_prefix, False, "test")
         print_tree(node.then_stmts, new_prefix, False, "then")
         print_tree(node.else_stmts, new_prefix, True, "else")
+    elif isinstance(node, WhileStmt):
+        print(f"{prefix}{connector}{label_str}WhileStmt")
+        new_prefix = prefix + ("    " if is_last else "│   ")
+        print_tree(node.test, new_prefix, False, "test")
+        print_tree(node.body_stmts, new_prefix, True, "body")
     elif isinstance(node, Stmts):
         print(f"{prefix}{connector}{label_str}Stmts")
         new_prefix = prefix + ("    " if is_last else "│   ")
@@ -110,7 +115,7 @@ def print_tree(node, prefix="", is_last=True, label=""):
 def generate_ast_image(node, filename="ast"):
     try:
         from graphviz import Digraph
-        from model import Integer, Float, String, Bool, Grouping, UnOp, BinOp, Identifier, Assignment, LogicalOp, Stmts, PrintStmt, IfStmt
+        from model import Integer, Float, String, Bool, Grouping, UnOp, BinOp, Identifier, Assignment, LogicalOp, Stmts, PrintStmt, IfStmt, WhileStmt
     except ImportError:
         print("plz install graphviz: pip install graphviz")
         return
@@ -155,6 +160,10 @@ def generate_ast_image(node, filename="ast"):
             add_node(n.test, node_id, "test")
             add_node(n.then_stmts, node_id, "then")
             add_node(n.else_stmts, node_id, "else")
+        elif isinstance(n, WhileStmt):
+            dot.node(node_id, "WhileStmt", shape="box", style="filled", fillcolor="lightskyblue")
+            add_node(n.test, node_id, "test")
+            add_node(n.body_stmts, node_id, "body")
         elif isinstance(n, Stmts):
             dot.node(node_id, "Stmts", shape="box", style="filled", fillcolor="lavender")
             for i, stmt in enumerate(n.stmts):
