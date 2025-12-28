@@ -172,24 +172,26 @@ class PrintStmt(Stmt):
 
 class IfStmt(Stmt):
 
-    def __init__(self,test,then_stmts,else_stmts,line):
-        assert isinstance(test,Expr),test
-        assert isinstance(then_stmts,Stmts),then_stmts
-        assert isinstance(else_stmts,Stmts),else_stmts
+    def __init__(self, test, then_stmts, else_stmts, line):
+        assert isinstance(test, Expr), test
+        assert isinstance(then_stmts, Stmts), then_stmts
+        assert else_stmts is None or isinstance(else_stmts, Stmts), else_stmts
         self.test = test
         self.then_stmts = then_stmts
         self.else_stmts = else_stmts
+        self.line = line
+
     def __repr__(self):
-        return f'IfStmt(test:{self.test},then_stmts:{self.then_stmts},else_stmts{self.else_stmts})'
+        return f'IfStmt(test:{self.test},then_stmts:{self.then_stmts},else_stmts:{self.else_stmts})'
 
 
 class ForStmt(Stmt):
-    def __init__(self,ident,start,end,step,body_stmts,line):
-        assert isinstance(ident,Identifier),ident
-        assert isinstance(start,Expr),start
-        assert isinstance(end,Expr),end
-        assert isinstance(step,Expr),step
-        assert isinstance(body_stmts,Stmts),body_stmts
+    def __init__(self, ident, start, end, step, body_stmts, line):
+        assert isinstance(ident, Identifier), ident
+        assert isinstance(start, Expr), start
+        assert isinstance(end, Expr), end
+        assert step is None or isinstance(step, Expr), step
+        assert isinstance(body_stmts, Stmts), body_stmts
         self.ident = ident
         self.start = start
         self.end = end

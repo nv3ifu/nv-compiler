@@ -49,10 +49,15 @@ def print_pretty_ast(ast_text):
 
 
 def print_tree(node, prefix="", is_last=True, label=""):
-    from model import Integer, Float, String, Bool, Grouping, UnOp, BinOp, Identifier, Assignment, LogicalOp, Stmts, PrintStmt, IfStmt, WhileStmt
+    from model import Integer, Float, String, Bool, Grouping, UnOp, BinOp, Identifier, Assignment, LogicalOp, Stmts, PrintStmt, IfStmt, WhileStmt, ForStmt
 
     connector = "└── " if is_last else "├── "
     label_str = f"{label}: " if label else ""
+
+    # 处理 None 节点
+    if node is None:
+        print(f"{prefix}{connector}{label_str}None")
+        return
 
     if isinstance(node, Integer):
         print(f"{prefix}{connector}{label_str}Integer({node.value})")
@@ -91,12 +96,24 @@ def print_tree(node, prefix="", is_last=True, label=""):
         print(f"{prefix}{connector}{label_str}IfStmt")
         new_prefix = prefix + ("    " if is_last else "│   ")
         print_tree(node.test, new_prefix, False, "test")
-        print_tree(node.then_stmts, new_prefix, False, "then")
-        print_tree(node.else_stmts, new_prefix, True, "else")
+        if node.else_stmts is not None:
+            print_tree(node.then_stmts, new_prefix, False, "then")
+            print_tree(node.else_stmts, new_prefix, True, "else")
+        else:
+            print_tree(node.then_stmts, new_prefix, True, "then")
     elif isinstance(node, WhileStmt):
         print(f"{prefix}{connector}{label_str}WhileStmt")
         new_prefix = prefix + ("    " if is_last else "│   ")
         print_tree(node.test, new_prefix, False, "test")
+        print_tree(node.body_stmts, new_prefix, True, "body")
+    elif isinstance(node, ForStmt):
+        print(f"{prefix}{connector}{label_str}ForStmt")
+        new_prefix = prefix + ("    " if is_last else "│   ")
+        print_tree(node.ident, new_prefix, False, "ident")
+        print_tree(node.start, new_prefix, False, "start")
+        print_tree(node.end, new_prefix, False, "end")
+        if node.step is not None:
+            print_tree(node.step, new_prefix, False, "step")
         print_tree(node.body_stmts, new_prefix, True, "body")
     elif isinstance(node, Stmts):
         print(f"{prefix}{connector}{label_str}Stmts")
@@ -115,7 +132,7 @@ def print_tree(node, prefix="", is_last=True, label=""):
 def generate_ast_image(node, filename="ast"):
     try:
         from graphviz import Digraph
-        from model import Integer, Float, String, Bool, Grouping, UnOp, BinOp, Identifier, Assignment, LogicalOp, Stmts, PrintStmt, IfStmt, WhileStmt
+        from model import Integer, Float, String, Bool, Grouping, UnOp, BinOp, Identifier, Assignment, LogicalOp, Stmts, PrintStmt, IfStmt, WhileStmt, ForStmt
     except ImportError:
         print("plz install graphviz: pip install graphviz")
         return
@@ -125,6 +142,14 @@ def generate_ast_image(node, filename="ast"):
     dot.attr('node', fontname='Consolas')
 
     def add_node(n, parent_id=None, edge_label=""):
+        # 处理 None 节点
+        if n is None:
+            node_id = str(id(n)) + "_none_" + str(parent_id)
+            dot.node(node_id, "None", shape="ellipse", style="filled", fillcolor="lightgray")
+            if parent_id:
+                dot.edge(parent_id, node_id, label=edge_label)
+            return
+
         node_id = str(id(n))
 
         if isinstance(n, Integer):
@@ -159,10 +184,19 @@ def generate_ast_image(node, filename="ast"):
             dot.node(node_id, "IfStmt", shape="box", style="filled", fillcolor="lightskyblue")
             add_node(n.test, node_id, "test")
             add_node(n.then_stmts, node_id, "then")
-            add_node(n.else_stmts, node_id, "else")
+            if n.else_stmts is not None:
+                add_node(n.else_stmts, node_id, "else")
         elif isinstance(n, WhileStmt):
             dot.node(node_id, "WhileStmt", shape="box", style="filled", fillcolor="lightskyblue")
             add_node(n.test, node_id, "test")
+            add_node(n.body_stmts, node_id, "body")
+        elif isinstance(n, ForStmt):
+            dot.node(node_id, "ForStmt", shape="box", style="filled", fillcolor="lightcoral")
+            add_node(n.ident, node_id, "ident")
+            add_node(n.start, node_id, "start")
+            add_node(n.end, node_id, "end")
+            if n.step is not None:
+                add_node(n.step, node_id, "step")
             add_node(n.body_stmts, node_id, "body")
         elif isinstance(n, Stmts):
             dot.node(node_id, "Stmts", shape="box", style="filled", fillcolor="lavender")
@@ -171,6 +205,9 @@ def generate_ast_image(node, filename="ast"):
         elif isinstance(n, PrintStmt):
             dot.node(node_id, "PrintStmt", shape="box", style="filled", fillcolor="palegreen")
             add_node(n.value, node_id, "value")
+        else:
+            # 处理未知节点类型
+            dot.node(node_id, str(type(n).__name__), shape="box", style="filled", fillcolor="white")
 
         if parent_id:
             dot.edge(parent_id, node_id, label=edge_label)
