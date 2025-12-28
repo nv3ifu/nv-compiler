@@ -157,7 +157,21 @@ class Parser:
 
 
     def for_stmt(self):
-        pass
+        self.expect(TOK_FOR)
+        identifier = self.primary()
+        self.expect(TOK_ASSIGN)
+        start = self.expr()
+        self.expect(TOK_COMMA)
+        end = self.expr()
+        if self.is_next(TOK_COMMA):
+            self.advance()
+            step = self.expr()
+        else:
+            step = None
+        self.expect(TOK_DO)
+        body_stmts = self.stmts()
+        self.expect(TOK_END)
+        return ForStmt(identifier,start,end,step,body_stmts,self.previous_token().line)
 
     def while_stmt(self):
         self.expect(TOK_WHILE)
@@ -174,6 +188,8 @@ class Parser:
 
     def func_stmt(self):
         pass
+
+
 
     def stmt(self):
         if self.peek().token_type == TOK_PRINT:

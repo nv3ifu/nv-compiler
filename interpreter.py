@@ -158,6 +158,22 @@ class Interpreter:
                 if not test_val:
                     break
                 self.interpret(node.body_stmts,new_env)
+        elif isinstance(node, ForStmt):
+            new_env = env.new_env()
+            varname = node.ident.name
+            itype,ival = self.interpret(node.start,new_env)
+            endtype,endval = self.interpret(node.end,new_env)
+            if ival<endval:
+                if node.step == Node:
+                    stepval = 1
+                    steptype = TYPE_NUMBER
+                else:
+                    steptype,stepval = self.interpret(node.step,new_env)
+                while ival<endval:
+                    newval = (TYPE_NUMBER,ival)
+                    env.set_var(varname,newval)
+                    self.interpret(node.body_stmts,new_env)
+                    ival+=stepval
 
 
     def interpret_ast(self,node):

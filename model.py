@@ -181,5 +181,22 @@ class IfStmt(Stmt):
         self.else_stmts = else_stmts
     def __repr__(self):
         return f'IfStmt(test:{self.test},then_stmts:{self.then_stmts},else_stmts{self.else_stmts})'
+
+
 class ForStmt(Stmt):
-    pass
+    def __init__(self,ident,start,end,step,body_stmts,line):
+        assert isinstance(ident,Identifier),ident
+        assert isinstance(start,Expr),start
+        assert isinstance(end,Expr),end
+        assert isinstance(step,Expr),step
+        assert isinstance(body_stmts,Stmts),body_stmts
+        self.ident = ident
+        self.start = start
+        self.end = end
+        self.step = step
+        self.body_stmts = body_stmts
+        self.line = line
+
+    def __repr__(self):
+        return f'ForStmt({self.ident},{self.start},{self.end},{self.step},{self.body_stmts})'
+
