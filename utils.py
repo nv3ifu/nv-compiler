@@ -128,6 +128,15 @@ def print_tree(node, prefix="", is_last=True, label=""):
     else:
         print(f"{prefix}{connector}{label_str}{node}")
 
+def stringify(val):
+    if isinstance(val,bool) and val == True:
+        return 'true'
+    elif isinstance(val,bool) and val == False:
+        return 'false'
+    elif isinstance(val,float) and val.is_integer():
+        return str(int(val))
+    else:
+        return str(val)
 
 def generate_ast_image(node, filename="ast"):
     try:
