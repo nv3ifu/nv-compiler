@@ -249,3 +249,12 @@ class RetStmt(Stmt):
     def __repr__(self):
         return f'RetStmt({self.expr})'
     
+class LocalStmt(Stmt):
+    def __init__(self,ident,expr,line):
+        assert isinstance(ident,str),ident
+        assert isinstance(expr,Expr),expr
+        self.ident = ident
+        self.expr = expr
+        self.line = line
+    def __repr__(self):
+        return f'LocalStmt({self.ident},{self.expr})'

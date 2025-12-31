@@ -189,7 +189,7 @@ class Interpreter:
                     args.append(self.interpret(arg,env))
                 new_env = func_env.new_env()
                 for param,arg in zip(func_decl.params,args):
-                    new_env.set_param_as_local_var(param.name,arg)
+                    new_env.set_local(param.name,arg)
                 try:
                     self.interpret(func_decl.body_stmts,new_env)
                 except ReturnException as e:
@@ -201,7 +201,8 @@ class Interpreter:
             self.interpret(node.expr,env)
         elif isinstance(node, RetStmt):
             raise ReturnException(self.interpret(node.expr,env))
-
+        elif isinstance(node, LocalStmt):
+            env.set_local(node.ident,self.interpret(node.expr,env))
 
     def interpret_ast(self,node):
         env = Environment()

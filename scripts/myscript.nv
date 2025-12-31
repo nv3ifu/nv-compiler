@@ -1,10 +1,9 @@
 x := 100
 
-func foo(x)
+func foo()
+    x := 50
     println(x)
-    ret x
 end
 
-println(x)
-println(foo(42))
-println(x)
+foo()
+println(x)  

@@ -33,6 +33,7 @@ TOK_STRING = 'TOK_STRING'
 TOK_INTEGER = 'TOK_INTEGER'
 TOK_FLOAT = 'TOK_FLOAT'
 # Keywords
+TOK_LOCAL = 'TOK_LOCAL'
 TOK_IF = 'TOK_IF'
 TOK_THEN = 'TOK_THEN'
 TOK_ELSE = 'TOK_ELSE'
@@ -51,6 +52,7 @@ TOK_PRINTLN = 'TOK_PRINTLN'
 TOK_RET = 'TOK_RET'
 
 keywords = {
+    'local': TOK_LOCAL,
     'if': TOK_IF,
     'else': TOK_ELSE,
     'then': TOK_THEN,

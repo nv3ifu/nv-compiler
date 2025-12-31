@@ -231,6 +231,13 @@ class Parser:
         expr = self.expr()
         return RetStmt(expr,self.previous_token().line)
 
+    def local_stmt(self):
+        self.expect(TOK_LOCAL)
+        name = self.expect(TOK_IDENTIFIER)
+        self.expect(TOK_ASSIGN)
+        val = self.expr()
+        return LocalStmt(name.lexeme,val,self.previous_token().line)
+
     def stmt(self):
         if self.peek().token_type == TOK_PRINT:
             return self.print_stmt(end = '')
@@ -246,6 +253,8 @@ class Parser:
             return self.func_decl()
         if self.peek().token_type == TOK_RET:
             return self.ret_stmt()
+        if self.peek().token_type == TOK_LOCAL:
+            return self.local_stmt()
         expr = self.expr()
         if self.match(TOK_ASSIGN):
             op = self.previous_token()

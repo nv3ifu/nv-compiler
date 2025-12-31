@@ -8,7 +8,7 @@ if __name__ == "__main__":
         raise SystemExit("Usage: python nv.py <filename>")
     filename = sys.argv[1]
     print(filename)
-    with open(filename) as f:
+    with open(filename, encoding='utf-8') as f:
         source = f.read()
         print(f'{Colors.GREEN}***************************************{Colors.WHITE}')
         print(f'{Colors.GREEN}SOURCE:{Colors.WHITE}')
