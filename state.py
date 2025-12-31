@@ -33,3 +33,5 @@ class Environment:
     def set_func(self,name,value):
         self.funcs[name] = value
 
+    def set_param_as_local_var(self,name,value):
+        self.var[name] = value

@@ -244,13 +244,17 @@ class Parser:
             return self.for_stmt()
         if self.peek().token_type == TOK_FUNC:
             return self.func_decl()
-        else:
-            if self.match(TOK_ASSIGN):
-                return self.assignment()
+        if self.peek().token_type == TOK_RET:
+            return self.ret_stmt()
+        expr = self.expr()
+        if self.match(TOK_ASSIGN):
+            op = self.previous_token()
+            right = self.expr()
+            if isinstance(expr, Identifier):
+                return Assignment(expr, right, line=op.line)
             else:
-                if self.peek().token_type == TOK_RET:
-                    return self.ret_stmt()
-                return FuncCallStmt(self.expr())
+                parse_error(f"Invalid assignment target {expr}", op.line)
+        return FuncCallStmt(expr)
 
     def stmts(self):
         stmts = []

@@ -1,5 +1,10 @@
-func main(x,y)
-    println("Hello, World!"+x+y)
-    ret x+y
+x := 100
+
+func foo(x)
+    println(x)
+    ret x
 end
-println(main(1,2))
+
+println(x)
+println(foo(42))
+println(x)

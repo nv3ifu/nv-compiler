@@ -189,7 +189,7 @@ class Interpreter:
                     args.append(self.interpret(arg,env))
                 new_env = func_env.new_env()
                 for param,arg in zip(func_decl.params,args):
-                    new_env.set_var(param.name,arg)
+                    new_env.set_param_as_local_var(param.name,arg)
                 try:
                     self.interpret(func_decl.body_stmts,new_env)
                 except ReturnException as e:

@@ -49,7 +49,7 @@ def print_pretty_ast(ast_text):
 
 
 def print_tree(node, prefix="", is_last=True, label=""):
-    from model import Integer, Float, String, Bool, Grouping, UnOp, BinOp, Identifier, Assignment, LogicalOp, Stmts, PrintStmt, IfStmt, WhileStmt, ForStmt, FuncDecl, FuncCall, Params
+    from model import Integer, Float, String, Bool, Grouping, UnOp, BinOp, Identifier, Assignment, LogicalOp, Stmts, PrintStmt, IfStmt, WhileStmt, ForStmt, FuncDecl, FuncCall, Params, FuncCallStmt, RetStmt
 
     connector = "└── " if is_last else "├── "
     label_str = f"{label}: " if label else ""
@@ -140,6 +140,14 @@ def print_tree(node, prefix="", is_last=True, label=""):
             print_tree(arg, new_prefix, is_last_arg, f"arg[{i}]")
     elif isinstance(node, Params):
         print(f"{prefix}{connector}{label_str}Param({node.name})")
+    elif isinstance(node, FuncCallStmt):
+        print(f"{prefix}{connector}{label_str}FuncCallStmt")
+        new_prefix = prefix + ("    " if is_last else "│   ")
+        print_tree(node.expr, new_prefix, True, "expr")
+    elif isinstance(node, RetStmt):
+        print(f"{prefix}{connector}{label_str}RetStmt")
+        new_prefix = prefix + ("    " if is_last else "│   ")
+        print_tree(node.expr, new_prefix, True, "expr")
     else:
         print(f"{prefix}{connector}{label_str}{node}")
 
@@ -156,7 +164,7 @@ def stringify(val):
 def generate_ast_image(node, filename="ast"):
     try:
         from graphviz import Digraph
-        from model import Integer, Float, String, Bool, Grouping, UnOp, BinOp, Identifier, Assignment, LogicalOp, Stmts, PrintStmt, IfStmt, WhileStmt, ForStmt, FuncDecl, FuncCall, Params
+        from model import Integer, Float, String, Bool, Grouping, UnOp, BinOp, Identifier, Assignment, LogicalOp, Stmts, PrintStmt, IfStmt, WhileStmt, ForStmt, FuncDecl, FuncCall, Params, FuncCallStmt, RetStmt
     except ImportError:
         print("plz install graphviz: pip install graphviz")
         return
@@ -240,6 +248,12 @@ def generate_ast_image(node, filename="ast"):
                 add_node(arg, node_id, f"arg[{i}]")
         elif isinstance(n, Params):
             dot.node(node_id, f"Param\n{n.name}", shape="ellipse", style="filled", fillcolor="lightcyan")
+        elif isinstance(n, FuncCallStmt):
+            dot.node(node_id, "FuncCallStmt", shape="box", style="filled", fillcolor="gold")
+            add_node(n.expr, node_id, "expr")
+        elif isinstance(n, RetStmt):
+            dot.node(node_id, "RetStmt", shape="box", style="filled", fillcolor="salmon")
+            add_node(n.expr, node_id, "expr")
         else:
             # 处理未知节点类型
             dot.node(node_id, str(type(n).__name__), shape="box", style="filled", fillcolor="white")
