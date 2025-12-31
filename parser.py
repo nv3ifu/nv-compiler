@@ -48,7 +48,14 @@ class Parser:
                                                  line=self.previous_token().line)
         if self.match(TOK_INTEGER): return Integer(int(self.previous_token().lexeme), line=self.previous_token().line)
         if self.match(TOK_FLOAT): return Float(float(self.previous_token().lexeme), line=self.previous_token().line)
-        if self.match(TOK_IDENTIFIER): return Identifier(self.previous_token().lexeme, line=self.previous_token().line)
+        if self.match(TOK_IDENTIFIER):
+            name_token = self.previous_token()
+            if self.match(TOK_LPAREN):
+                args = self.args()
+                self.expect(TOK_RPAREN)
+                return FuncCall(name_token.lexeme, args, name_token.line)
+            else:
+                return Identifier(name_token.lexeme, line=name_token.line)
         if self.match(TOK_LPAREN):
             expr = self.expr()
             if (not self.match(TOK_RPAREN)):
@@ -186,10 +193,43 @@ class Parser:
             val = self.expr()
             return PrintStmt(val,self.previous_token().line,end)
 
-    def func_stmt(self):
-        pass
+    def params(self):
+        params = []
+        count = 0
+        while not self.is_next(TOK_RPAREN):
+            count += 1
+            if count > 255:
+                parse_error('Too many parameters', self.previous_token().line)
+            name = self.expect(TOK_IDENTIFIER)
+            params.append(Params(name.lexeme,self.previous_token().line))
+            if not self.is_next(TOK_RPAREN):
+                self.expect(TOK_COMMA)
+        return params
+
+    def args(self):
+        args = []
+        while not self.is_next(TOK_RPAREN):
+            arg = self.expr()
+            args.append(arg)
+            if not self.is_next(TOK_RPAREN):
+                self.expect(TOK_COMMA)
+        return args
 
 
+    def func_decl(self):
+        self.expect(TOK_FUNC)
+        name = self.expect(TOK_IDENTIFIER)
+        self.expect(TOK_LPAREN)
+        params = self.params()
+        self.expect(TOK_RPAREN)
+        body_stmts = self.stmts()
+        self.expect(TOK_END)
+        return FuncDecl(name.lexeme,params,body_stmts,self.previous_token().line)
+
+    def ret_stmt(self):
+        self.expect(TOK_RET)
+        expr = self.expr()
+        return RetStmt(expr,self.previous_token().line)
 
     def stmt(self):
         if self.peek().token_type == TOK_PRINT:
@@ -203,9 +243,14 @@ class Parser:
         if self.peek().token_type == TOK_FOR:
             return self.for_stmt()
         if self.peek().token_type == TOK_FUNC:
-            return self.func_stmt()
+            return self.func_decl()
         else:
-            return self.assignment()
+            if self.match(TOK_ASSIGN):
+                return self.assignment()
+            else:
+                if self.peek().token_type == TOK_RET:
+                    return self.ret_stmt()
+                return FuncCallStmt(self.expr())
 
     def stmts(self):
         stmts = []

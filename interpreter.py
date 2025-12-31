@@ -175,8 +175,37 @@ class Interpreter:
                     env.set_var(varname,newval)
                     self.interpret(node.body_stmts,new_env)
                     ival+=stepval
+        elif isinstance(node, FuncCall):
+            func = env.get_func(node.name)
+            if func is None:
+                runtime_error(f"function {node.name} not found",node.line)
+            else:
+                func_decl = func[0]
+                func_env = func[1]
+                if len(func_decl.params)!=len(node.args):
+                    runtime_error(f"function {node.name} expected {len(func_decl.params)} arguments, got {len(node.args)}",node.line)
+                args = []
+                for arg in node.args:
+                    args.append(self.interpret(arg,env))
+                new_env = func_env.new_env()
+                for param,arg in zip(func_decl.params,args):
+                    new_env.set_var(param.name,arg)
+                try:
+                    self.interpret(func_decl.body_stmts,new_env)
+                except ReturnException as e:
+                    return e.args[0]
+
+        elif isinstance(node, FuncDecl):
+            env.set_func(node.name,(node,env))
+        elif isinstance(node, FuncCallStmt):
+            self.interpret(node.expr,env)
+        elif isinstance(node, RetStmt):
+            raise ReturnException(self.interpret(node.expr,env))
 
 
     def interpret_ast(self,node):
         env = Environment()
         self.interpret(node,env)
+
+class ReturnException(Exception):
+    pass

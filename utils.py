@@ -49,7 +49,7 @@ def print_pretty_ast(ast_text):
 
 
 def print_tree(node, prefix="", is_last=True, label=""):
-    from model import Integer, Float, String, Bool, Grouping, UnOp, BinOp, Identifier, Assignment, LogicalOp, Stmts, PrintStmt, IfStmt, WhileStmt, ForStmt
+    from model import Integer, Float, String, Bool, Grouping, UnOp, BinOp, Identifier, Assignment, LogicalOp, Stmts, PrintStmt, IfStmt, WhileStmt, ForStmt, FuncDecl, FuncCall, Params
 
     connector = "└── " if is_last else "├── "
     label_str = f"{label}: " if label else ""
@@ -125,6 +125,21 @@ def print_tree(node, prefix="", is_last=True, label=""):
         print(f"{prefix}{connector}{label_str}PrintStmt")
         new_prefix = prefix + ("    " if is_last else "│   ")
         print_tree(node.value, new_prefix, True, "value")
+    elif isinstance(node, FuncDecl):
+        print(f"{prefix}{connector}{label_str}FuncDecl({node.name})")
+        new_prefix = prefix + ("    " if is_last else "│   ")
+        for i, param in enumerate(node.params):
+            is_last_param = (i == len(node.params) - 1) and node.body_stmts is None
+            print_tree(param, new_prefix, is_last_param, f"param[{i}]")
+        print_tree(node.body_stmts, new_prefix, True, "body")
+    elif isinstance(node, FuncCall):
+        print(f"{prefix}{connector}{label_str}FuncCall({node.name})")
+        new_prefix = prefix + ("    " if is_last else "│   ")
+        for i, arg in enumerate(node.args):
+            is_last_arg = (i == len(node.args) - 1)
+            print_tree(arg, new_prefix, is_last_arg, f"arg[{i}]")
+    elif isinstance(node, Params):
+        print(f"{prefix}{connector}{label_str}Param({node.name})")
     else:
         print(f"{prefix}{connector}{label_str}{node}")
 
@@ -141,7 +156,7 @@ def stringify(val):
 def generate_ast_image(node, filename="ast"):
     try:
         from graphviz import Digraph
-        from model import Integer, Float, String, Bool, Grouping, UnOp, BinOp, Identifier, Assignment, LogicalOp, Stmts, PrintStmt, IfStmt, WhileStmt, ForStmt
+        from model import Integer, Float, String, Bool, Grouping, UnOp, BinOp, Identifier, Assignment, LogicalOp, Stmts, PrintStmt, IfStmt, WhileStmt, ForStmt, FuncDecl, FuncCall, Params
     except ImportError:
         print("plz install graphviz: pip install graphviz")
         return
@@ -214,6 +229,17 @@ def generate_ast_image(node, filename="ast"):
         elif isinstance(n, PrintStmt):
             dot.node(node_id, "PrintStmt", shape="box", style="filled", fillcolor="palegreen")
             add_node(n.value, node_id, "value")
+        elif isinstance(n, FuncDecl):
+            dot.node(node_id, f"FuncDecl\n{n.name}", shape="box", style="filled", fillcolor="orchid")
+            for i, param in enumerate(n.params):
+                add_node(param, node_id, f"param[{i}]")
+            add_node(n.body_stmts, node_id, "body")
+        elif isinstance(n, FuncCall):
+            dot.node(node_id, f"FuncCall\n{n.name}", shape="box", style="filled", fillcolor="gold")
+            for i, arg in enumerate(n.args):
+                add_node(arg, node_id, f"arg[{i}]")
+        elif isinstance(n, Params):
+            dot.node(node_id, f"Param\n{n.name}", shape="ellipse", style="filled", fillcolor="lightcyan")
         else:
             # 处理未知节点类型
             dot.node(node_id, str(type(n).__name__), shape="box", style="filled", fillcolor="white")

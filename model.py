@@ -17,6 +17,8 @@ class Expr(Node):
     """
     pass
 
+class Decl(Stmt):
+    pass
 
 class Identifier(Expr):
     def __init__(self, name, line):
@@ -160,6 +162,7 @@ class Stmts(Node):
         return f'Stmts({self.stmts})'
 
 
+
 class PrintStmt(Stmt):
     def __init__(self, value, line,end):
         assert isinstance(value, Expr), value
@@ -202,3 +205,47 @@ class ForStmt(Stmt):
     def __repr__(self):
         return f'ForStmt({self.ident},{self.start},{self.end},{self.step},{self.body_stmts})'
 
+class FuncDecl(Decl):
+    def __init__(self,name,params,body_stmts,line):
+        assert isinstance(name,str),name
+        assert all(isinstance(param,Params) for param in params) ,params
+        self.name = name
+        self.params = params
+        self.body_stmts = body_stmts
+        self.line = line
+    def __repr__(self):
+        return f'FuncDecl({self.name},{self.params},{self.body_stmts})'
+
+class Params(Decl):
+    def __init__(self,name,line):
+        assert isinstance(name,str),name
+        self.name = name
+        self.line = line
+    def __repr__(self):
+        return f'Params({self.name})'
+
+class FuncCall(Expr):
+    def __init__(self,name,args,line):
+        assert isinstance(name,str),name
+        assert all(isinstance(arg,Expr) for arg in args),args
+        self.name = name
+        self.args = args
+        self.line = line
+    def __repr__(self):
+        return f'FuncCall({self.name},{self.args})'
+
+class FuncCallStmt(Stmt):
+    def __init__(self,expr):
+        assert isinstance(expr,Expr),expr
+        self.expr = expr
+    def __repr__(self):
+        return f'FuncCallStmt({self.expr})'
+
+class RetStmt(Stmt):
+    def __init__(self,expr,line):
+        assert isinstance(expr,Expr),expr
+        self.expr = expr
+        self.line = line
+    def __repr__(self):
+        return f'RetStmt({self.expr})'
+    

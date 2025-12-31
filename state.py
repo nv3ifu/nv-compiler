@@ -2,6 +2,7 @@ class Environment:
     def __init__(self,parent=None):
         self.parent = parent
         self.var = {}
+        self.funcs = {}
 
     def get_var(self,name):
         while self:
@@ -21,3 +22,14 @@ class Environment:
 
     def new_env(self):
         return Environment(parent=self)
+
+    def get_func(self,name):
+        while self:
+            value = self.funcs.get(name)
+            if value is not None:
+                return value
+            self = self.parent
+        return None
+    def set_func(self,name,value):
+        self.funcs[name] = value
+
