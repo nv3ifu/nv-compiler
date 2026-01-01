@@ -2,6 +2,8 @@ from interpreter import *
 from lexer import *
 from parser import *
 from utils import *
+from vm import *
+from compiler import *
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
@@ -31,3 +33,12 @@ if __name__ == "__main__":
         print(f'{Colors.GREEN}***************************************{Colors.WHITE}')
         interpreter = Interpreter()
         interpreter.interpret_ast(ast)
+        print(f'{Colors.GREEN}\n***************************************{Colors.WHITE}')
+        print(f'{Colors.GREEN}COMPILER:{Colors.WHITE}')
+        print(f'{Colors.GREEN}***************************************{Colors.WHITE}')
+        compiler = Compiler()
+        code = compiler.compile_code(ast)
+        print(code)
+        #vm = VM()
+        #vm.run(code)
+

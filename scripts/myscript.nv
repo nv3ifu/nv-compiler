@@ -1,9 +1,1 @@
-x := 100
-
-func foo()
-    x := 50
-    println(x)
-end
-
-foo()
-println(x)  
+print 2+3-1
