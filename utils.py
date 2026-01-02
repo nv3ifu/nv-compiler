@@ -161,6 +161,23 @@ def stringify(val):
     else:
         return str(val)
 
+
+def print_code(code):
+    """打印 VM 指令，格式化输出类似汇编风格"""
+    for op in code:
+        opcode = op[0]
+        if opcode in ('START', 'HALT'):
+            # 标签式指令，顶格加冒号
+            print(f"{opcode}:")
+        elif len(op) == 1:
+            # 无参数指令，缩进显示
+            print(f"    {opcode}")
+        else:
+            # 有参数指令（如 PUSH）
+            # op[1] 是 (TYPE, value) 元组
+            _, value = op[1]
+            print(f"    {opcode}  {stringify(value)}")
+
 def generate_ast_image(node, filename="ast"):
     try:
         from graphviz import Digraph
