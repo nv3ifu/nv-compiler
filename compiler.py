@@ -1,3 +1,4 @@
+from model import LogicalOp
 from model import *
 from tokens import *
 from utils import *
@@ -58,6 +59,23 @@ class Compiler:
             elif node.op.token_type == TOK_LE:
                 self.emit(('LE',))
 
+        if isinstance(node,UnOp):
+            self.compile(node.operand)
+            if node.op.token_type == TOK_PLUS:
+                self.emit(('POS',))
+            elif node.op.token_type == TOK_MINUS:
+                self.emit(('NEG',))
+            elif node.op.token_type == TOK_NOT:
+                self.emit(('PUSH',(TYPE_NUMBER,1)))
+                self.emit(('XOR',))
+
+        if isinstance(node,LogicalOp):
+            self.compile(node.left)
+            self.compile(node.right)
+            if node.op.token_type == TOK_AND:
+                self.emit(('AND',))
+            elif node.op.token_type == TOK_OR:
+                self.emit(('OR',))
 
 
         if isinstance(node,Stmts):
