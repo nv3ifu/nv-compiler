@@ -1,23 +1,5 @@
--- 算术运算
-println 3 + 2
-println 10 - 4
-println 5 * 6
-println 20 / 4
-println 2 ^ 3
-println 17 % 5
-println (2 + 3) * 4
-println -5
-
--- 比较运算
-println 5 > 3
-println 5 < 10
-println 5 >= 5
-println 5 <= 4
-println 5 == 5
-
--- 逻辑运算
-println true and true
-println true and false
-println false or true
-
-println "done"
+if 1>2 then
+    println "1 is greater than 2"
+else
+    println "1 is not greater than 2"
+end

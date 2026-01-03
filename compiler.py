@@ -10,9 +10,14 @@ TYPE_BOOL = 'TYPE_BOOL'  # true | false
 class Compiler:
     def __init__(self):
         self.code = []
+        self.label_counter = 0
 
     def emit(self,op):
         self.code.append(op)
+
+    def make_label(self):
+        self.label_counter += 1
+        return f'LABEL_{self.label_counter}'
 
     def compile(self,node):
         if isinstance(node,Integer):
@@ -93,8 +98,29 @@ class Compiler:
         if isinstance(node,Grouping):
             self.compile(node.value)
 
+        if isinstance(node,IfStmt):
+            self.compile(node.test)
+            then_label = self.make_label()
+            else_label = self.make_label()
+            exit_label = self.make_label()
+            self.emit(('JMPZ',else_label))
+            self.emit(('LABEL',then_label))
+            self.compile(node.then_stmts)
+            self.emit(('JMP',exit_label))
+            self.emit(('LABEL',else_label))
+            if node.else_stmts:
+                self.compile(node.else_stmts)
+            self.emit(('LABEL',exit_label))
+
+            
+
     def compile_code(self,node):
         self.emit(('START',))
         self.compile(node)
         self.emit(('HALT',))
         return self.code
+    
+
+
+    
+

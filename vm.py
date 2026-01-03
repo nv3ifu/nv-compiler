@@ -67,9 +67,18 @@ class VM:
         self.stack = []
         self.pc = 0
         self.sp = -1
+        self.labels = {}
         self.is_running = True
 
+    def create_label_table(self,instructions):
+        self.labels = {}
+        for i,op in enumerate(instructions):
+            if op[0] == 'LABEL':
+                self.labels[op[1]] = i
+
+
     def run(self,instructions):
+        self.create_label_table(instructions)  # 先建立标签表
         self.is_running = True
         while self.is_running:
             opcode,*args = instructions[self.pc]
@@ -231,3 +240,11 @@ class VM:
             self.PUSH((TYPE_BOOL, leftvalue != rightvalue))
         else:
             vm_error("Invalid types for NE", self.pc-1)
+
+    def JMP(self,*args):
+        self.pc = self.labels[args[0]]
+
+    def JMPZ(self,*args):
+        vatype, val = self.POP()    
+        if vatype == TYPE_BOOL and val == False:
+            self.pc = self.labels[args[0]]

@@ -168,19 +168,26 @@ def stringify(val):
 
 def print_code(code):
     """打印 VM 指令，格式化输出类似汇编风格"""
-    for op in code:
+    for i, op in enumerate(code):
         opcode = op[0]
+        idx = f"{i:08d}"
         if opcode in ('START', 'HALT'):
             # 标签式指令，顶格加冒号
-            print(f"{opcode}:")
+            print(f"{idx} {opcode}:")
+        elif opcode == 'LABEL':
+            # 标签定义，顶格显示
+            print(f"{idx} {op[1]}:")
+        elif opcode in ('JMP', 'JMPZ', 'JSR'):
+            # 跳转指令，参数是标签名字符串
+            print(f"{idx}     {opcode}  {op[1]}")
         elif len(op) == 1:
             # 无参数指令，缩进显示
-            print(f"    {opcode}")
+            print(f"{idx}     {opcode}")
         else:
             # 有参数指令（如 PUSH）
             # op[1] 是 (TYPE, value) 元组
             _, value = op[1]
-            print(f"    {opcode}  {stringify(value)}")
+            print(f"{idx}     {opcode}  {stringify(value)}")
 
 def generate_ast_image(node, filename="ast"):
     try:
