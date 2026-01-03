@@ -39,6 +39,9 @@ if __name__ == "__main__":
         compiler = Compiler()
         code = compiler.compile_code(ast)
         print_code(code)
-        #vm = VM()
-        #vm.run(code)
+        print(f'{Colors.GREEN}***************************************{Colors.WHITE}')
+        print(f'{Colors.GREEN}VM:{Colors.WHITE}')
+        print(f'{Colors.GREEN}***************************************{Colors.WHITE}')
+        vm = VM()
+        vm.run(code)
 

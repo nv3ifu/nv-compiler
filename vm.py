@@ -55,10 +55,100 @@
 #      ('JSR', name)         # Jump to subroutine/function and keep track of the returning PC
 #      ('RTS',)              # Return from subroutine/function
 
+import codecs
+from utils import *
+
+TYPE_NUMBER = 'TYPE_NUMBER'  # Default to 64-bit float
+TYPE_STRING = 'TYPE_STRING'  # String managed by the host language
+TYPE_BOOL = 'TYPE_BOOL'  # true | false
+
 class VM:
     def __init__(self):
         self.stack = []
-        self.ip = 0
+        self.pc = 0
+        self.sp = -1
+        self.is_running = True
 
     def run(self,instructions):
+        self.is_running = True
+        while self.is_running:
+            opcode,*args = instructions[self.pc]
+            self.pc += 1
+            getattr(self, opcode)(*args)
+
+    def START(self,*args):
+        self.is_running = True
+
+    def HALT(self,*args):
+        self.is_running = False
+
+    def LABEL(self,*args):
         pass
+
+    def JMP(self,*args):
+        pass
+
+    def JMPZ(self,*args):
+        pass
+
+    def JSR(self,*args):
+        pass
+
+    def RTS(self,*args):
+        pass
+
+    def PUSH(self,*args):
+        self.stack.append(args[0])
+        self.sp += 1
+
+    def POP(self,*args):
+        self.sp -= 1
+        return self.stack.pop()
+
+    def ADD(self,*args):
+        lefttype,leftvalue = self.stack[self.sp]
+        righttype,rightvalue = self.stack[self.sp-1]
+        if lefttype == TYPE_NUMBER and righttype == TYPE_NUMBER:
+            self.stack[self.sp-1] = (TYPE_NUMBER,leftvalue+rightvalue)
+            self.stack.pop()
+            self.sp -= 1
+        else:
+            vm_error("Invalid types for ADD",self.pc)
+
+    def SUB(self,*args):
+        lefttype,leftvalue = self.stack[self.sp]
+        righttype,rightvalue = self.stack[self.sp-1]
+        if lefttype == TYPE_NUMBER and righttype == TYPE_NUMBER:
+            self.stack[self.sp-1] = (TYPE_NUMBER,rightvalue-leftvalue)
+            self.stack.pop()
+            self.sp -= 1
+        else:
+            vm_error("Invalid types for SUB",self.pc)
+
+    def MUL(self,*args):
+        lefttype,leftvalue = self.stack[self.sp]
+        righttype,rightvalue = self.stack[self.sp-1]
+        if lefttype == TYPE_NUMBER and righttype == TYPE_NUMBER:
+            self.stack[self.sp-1] = (TYPE_NUMBER,leftvalue*rightvalue)
+            self.stack.pop()
+            self.sp -= 1
+        else:
+            vm_error("Invalid types for MUL",self.pc)
+
+    def DIV(self,*args):
+        lefttype,leftvalue = self.stack[self.sp]
+        righttype,rightvalue = self.stack[self.sp-1]
+        if lefttype == TYPE_NUMBER and righttype == TYPE_NUMBER:
+            self.stack[self.sp-1] = (TYPE_NUMBER,leftvalue/rightvalue)
+            self.stack.pop()
+            self.sp -= 1
+        else:
+            vm_error("Invalid types for DIV",self.pc)
+
+    def PRINT(self,*args):
+        vatype,val = self.POP()
+        print(codecs.escape_decode(bytes(stringify(val),"utf-8"))[0].decode("utf-8"),end="")
+
+    def PRINTLN(self,*args):
+        vatype,val = self.POP()
+        print(codecs.escape_decode(bytes(stringify(val),"utf-8"))[0].decode("utf-8"),end="\n")
