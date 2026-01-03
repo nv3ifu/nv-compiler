@@ -68,6 +68,7 @@ class VM:
         self.pc = 0
         self.sp = -1
         self.labels = {}
+        self.globals = {}
         self.is_running = True
 
     def create_label_table(self,instructions):
@@ -107,6 +108,8 @@ class VM:
         lefttype, leftvalue = self.POP()
         if lefttype == TYPE_NUMBER and righttype == TYPE_NUMBER:
             self.PUSH((TYPE_NUMBER, leftvalue + rightvalue))
+        elif lefttype == TYPE_STRING or righttype == TYPE_STRING:
+            self.PUSH((TYPE_STRING, stringify(leftvalue) + stringify(rightvalue)))
         else:
             vm_error("Invalid types for ADD", self.pc-1)
 
@@ -228,6 +231,8 @@ class VM:
             self.PUSH((TYPE_BOOL, leftvalue == rightvalue))
         elif lefttype == TYPE_STRING and righttype == TYPE_STRING:
             self.PUSH((TYPE_BOOL, leftvalue == rightvalue))
+        elif lefttype == TYPE_BOOL and righttype == TYPE_BOOL:
+            self.PUSH((TYPE_BOOL, leftvalue == rightvalue))
         else:
             vm_error("Invalid types for EQ", self.pc-1)
 
@@ -237,6 +242,8 @@ class VM:
         if lefttype == TYPE_NUMBER and righttype == TYPE_NUMBER:
             self.PUSH((TYPE_BOOL, leftvalue != rightvalue))
         elif lefttype == TYPE_STRING and righttype == TYPE_STRING:
+            self.PUSH((TYPE_BOOL, leftvalue != rightvalue))
+        elif lefttype == TYPE_BOOL and righttype == TYPE_BOOL:
             self.PUSH((TYPE_BOOL, leftvalue != rightvalue))
         else:
             vm_error("Invalid types for NE", self.pc-1)
@@ -248,3 +255,9 @@ class VM:
         vatype, val = self.POP()    
         if vatype == TYPE_BOOL and val == False:
             self.pc = self.labels[args[0]]
+
+    def LOAD_GLOBAL(self,*args):
+        self.PUSH((self.globals[args[0]]))
+
+    def STORE_GLOBAL(self,*args):
+        self.globals[args[0]] = self.POP()

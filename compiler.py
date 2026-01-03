@@ -7,10 +7,16 @@ TYPE_NUMBER = 'TYPE_NUMBER'  # Default to 64-bit float
 TYPE_STRING = 'TYPE_STRING'  # String managed by the host language
 TYPE_BOOL = 'TYPE_BOOL'  # true | false
 
+class Symbol:
+    def __init__(self,name):
+        self.name = name
+
 class Compiler:
     def __init__(self):
         self.code = []
         self.label_counter = 0
+        self.globals =  []
+        self.numglobals = 0
 
     def emit(self,op):
         self.code.append(op)
@@ -18,6 +24,12 @@ class Compiler:
     def make_label(self):
         self.label_counter += 1
         return f'LABEL_{self.label_counter}'
+
+    def get_symbol(self,name):
+        for symbol in self.globals:
+            if symbol.name == name:
+                return symbol
+        return None
 
     def compile(self,node):
         if isinstance(node,Integer):
@@ -112,7 +124,22 @@ class Compiler:
                 self.compile(node.else_stmts)
             self.emit(('LABEL',exit_label))
 
-            
+        if isinstance(node,Assignment):
+            self.compile(node.right)
+            symbol = self.get_symbol(node.left.name)
+            if not symbol:
+                new_symbol = Symbol(node.left.name)
+                self.globals.append(new_symbol)
+                self.numglobals += 1
+                self.emit(('STORE_GLOBAL',new_symbol.name))
+            else:
+                self.emit(('STORE_GLOBAL',symbol.name))
+
+        if isinstance(node,Identifier):
+            symbol = self.get_symbol(node.name)
+            if not symbol:
+                compile_error(f"Undefined variable {node.name}",node.line)
+            self.emit(('LOAD_GLOBAL',symbol.name))
 
     def compile_code(self,node):
         self.emit(('START',))

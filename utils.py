@@ -28,6 +28,10 @@ def vm_error(message,pc):
     print(f'{Colors.RED}[PC {pc}]: {message}{Colors.WHITE}')
     sys.exit(1)
 
+def compile_error(message, lineno):
+    print(f'{Colors.RED}[Line {lineno}]: {message}{Colors.WHITE}')
+    sys.exit(1)
+
 
 def print_pretty_ast(ast_text):
     i = 0
@@ -179,6 +183,9 @@ def print_code(code):
             print(f"{idx} {op[1]}:")
         elif opcode in ('JMP', 'JMPZ', 'JSR'):
             # 跳转指令，参数是标签名字符串
+            print(f"{idx}     {opcode}  {op[1]}")
+        elif opcode in ('LOAD_GLOBAL', 'STORE_GLOBAL'):
+            # 全局变量指令，参数是变量名字符串
             print(f"{idx}     {opcode}  {op[1]}")
         elif len(op) == 1:
             # 无参数指令，缩进显示

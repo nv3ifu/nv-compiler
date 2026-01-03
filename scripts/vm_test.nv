@@ -1,5 +1,3 @@
-if 1>2 then
-    println "1 is greater than 2"
-else
-    println "1 is not greater than 2"
-end
+x := 10
+println x
+
