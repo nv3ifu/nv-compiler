@@ -139,7 +139,7 @@ class VM:
         lefttype,leftvalue = self.stack[self.sp]
         righttype,rightvalue = self.stack[self.sp-1]
         if lefttype == TYPE_NUMBER and righttype == TYPE_NUMBER:
-            self.stack[self.sp-1] = (TYPE_NUMBER,leftvalue/rightvalue)
+            self.stack[self.sp-1] = (TYPE_NUMBER,rightvalue/leftvalue)
             self.stack.pop()
             self.sp -= 1
         else:
