@@ -46,7 +46,7 @@ class Compiler:
                 self.emit(('EXP',))
             elif node.op.token_type == TOK_MOD:
                 self.emit(('MOD',))
-            elif node.op.token_type == TOK_EQ:
+            elif node.op.token_type == TOK_EQEQ:
                 self.emit(('EQ',))
             elif node.op.token_type == TOK_NE:
                 self.emit(('NE',))
@@ -59,6 +59,7 @@ class Compiler:
             elif node.op.token_type == TOK_LE:
                 self.emit(('LE',))
 
+
         if isinstance(node,UnOp):
             self.compile(node.operand)
             if node.op.token_type == TOK_PLUS:
@@ -66,7 +67,7 @@ class Compiler:
             elif node.op.token_type == TOK_MINUS:
                 self.emit(('NEG',))
             elif node.op.token_type == TOK_NOT:
-                self.emit(('PUSH',(TYPE_NUMBER,1)))
+                self.emit(('PUSH',(TYPE_BOOL,True)))
                 self.emit(('XOR',))
 
         if isinstance(node,LogicalOp):
@@ -88,6 +89,9 @@ class Compiler:
                 self.emit(('PRINT',))
             else:
                 self.emit(('PRINTLN',))
+
+        if isinstance(node,Grouping):
+            self.compile(node.value)
 
     def compile_code(self,node):
         self.emit(('START',))

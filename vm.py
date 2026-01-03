@@ -85,18 +85,6 @@ class VM:
     def LABEL(self,*args):
         pass
 
-    def JMP(self,*args):
-        pass
-
-    def JMPZ(self,*args):
-        pass
-
-    def JSR(self,*args):
-        pass
-
-    def RTS(self,*args):
-        pass
-
     def PUSH(self,*args):
         self.stack.append(args[0])
         self.sp += 1
@@ -106,49 +94,140 @@ class VM:
         return self.stack.pop()
 
     def ADD(self,*args):
-        lefttype,leftvalue = self.stack[self.sp]
-        righttype,rightvalue = self.stack[self.sp-1]
+        righttype, rightvalue = self.POP()
+        lefttype, leftvalue = self.POP()
         if lefttype == TYPE_NUMBER and righttype == TYPE_NUMBER:
-            self.stack[self.sp-1] = (TYPE_NUMBER,leftvalue+rightvalue)
-            self.stack.pop()
-            self.sp -= 1
+            self.PUSH((TYPE_NUMBER, leftvalue + rightvalue))
         else:
-            vm_error("Invalid types for ADD",self.pc)
+            vm_error("Invalid types for ADD", self.pc-1)
 
     def SUB(self,*args):
-        lefttype,leftvalue = self.stack[self.sp]
-        righttype,rightvalue = self.stack[self.sp-1]
+        righttype, rightvalue = self.POP()
+        lefttype, leftvalue = self.POP()
         if lefttype == TYPE_NUMBER and righttype == TYPE_NUMBER:
-            self.stack[self.sp-1] = (TYPE_NUMBER,rightvalue-leftvalue)
-            self.stack.pop()
-            self.sp -= 1
+            self.PUSH((TYPE_NUMBER, leftvalue - rightvalue))
         else:
-            vm_error("Invalid types for SUB",self.pc)
+            vm_error("Invalid types for SUB", self.pc-1)
 
     def MUL(self,*args):
-        lefttype,leftvalue = self.stack[self.sp]
-        righttype,rightvalue = self.stack[self.sp-1]
+        righttype, rightvalue = self.POP()
+        lefttype, leftvalue = self.POP()
         if lefttype == TYPE_NUMBER and righttype == TYPE_NUMBER:
-            self.stack[self.sp-1] = (TYPE_NUMBER,leftvalue*rightvalue)
-            self.stack.pop()
-            self.sp -= 1
+            self.PUSH((TYPE_NUMBER, leftvalue * rightvalue))
         else:
-            vm_error("Invalid types for MUL",self.pc)
+            vm_error("Invalid types for MUL", self.pc-1)
 
     def DIV(self,*args):
-        lefttype,leftvalue = self.stack[self.sp]
-        righttype,rightvalue = self.stack[self.sp-1]
+        righttype, rightvalue = self.POP()
+        lefttype, leftvalue = self.POP()
         if lefttype == TYPE_NUMBER and righttype == TYPE_NUMBER:
-            self.stack[self.sp-1] = (TYPE_NUMBER,rightvalue/leftvalue)
-            self.stack.pop()
-            self.sp -= 1
+            self.PUSH((TYPE_NUMBER, leftvalue / rightvalue))
         else:
-            vm_error("Invalid types for DIV",self.pc)
+            vm_error("Invalid types for DIV", self.pc-1)
+
+    def EXP(self,*args):
+        righttype, rightvalue = self.POP()
+        lefttype, leftvalue = self.POP()
+        if lefttype == TYPE_NUMBER and righttype == TYPE_NUMBER:
+            self.PUSH((TYPE_NUMBER, leftvalue ** rightvalue))
+        else:
+            vm_error("Invalid types for EXP", self.pc-1)
+
+    def MOD(self,*args):
+        righttype, rightvalue = self.POP()
+        lefttype, leftvalue = self.POP()
+        if lefttype == TYPE_NUMBER and righttype == TYPE_NUMBER:
+            self.PUSH((TYPE_NUMBER, leftvalue % rightvalue))
+        else:
+            vm_error("Invalid types for MOD", self.pc-1)
 
     def PRINT(self,*args):
-        vatype,val = self.POP()
-        print(codecs.escape_decode(bytes(stringify(val),"utf-8"))[0].decode("utf-8"),end="")
+        vatype, val = self.POP()
+        print(codecs.escape_decode(bytes(stringify(val),"utf-8"))[0].decode("utf-8"), end="")
 
     def PRINTLN(self,*args):
-        vatype,val = self.POP()
-        print(codecs.escape_decode(bytes(stringify(val),"utf-8"))[0].decode("utf-8"),end="\n")
+        vatype, val = self.POP()
+        print(codecs.escape_decode(bytes(stringify(val),"utf-8"))[0].decode("utf-8"), end="\n")
+
+    def AND(self,*args):
+        righttype, rightvalue = self.POP()
+        lefttype, leftvalue = self.POP()
+        if lefttype == TYPE_BOOL and righttype == TYPE_BOOL:
+            self.PUSH((TYPE_BOOL, leftvalue and rightvalue))
+        else:
+            vm_error("Invalid types for AND", self.pc-1)
+    
+    def OR(self,*args):
+        righttype, rightvalue = self.POP()
+        lefttype, leftvalue = self.POP()
+        if lefttype == TYPE_BOOL and righttype == TYPE_BOOL:
+            self.PUSH((TYPE_BOOL, leftvalue or rightvalue))
+        else:
+            vm_error("Invalid types for OR", self.pc-1)
+
+    def XOR(self,*args):
+        righttype, rightvalue = self.POP()
+        lefttype, leftvalue = self.POP()
+        if lefttype == TYPE_BOOL and righttype == TYPE_BOOL:
+            self.PUSH((TYPE_BOOL, leftvalue ^ rightvalue))
+        else:
+            vm_error("Invalid types for XOR", self.pc-1)
+
+    def NEG(self,*args):
+        valtype, value = self.POP()
+        if valtype == TYPE_NUMBER:
+            self.PUSH((TYPE_NUMBER, -value))
+        else:
+            vm_error("Invalid types for NEG", self.pc-1)
+
+    def LT(self,*args):
+        righttype, rightvalue = self.POP()
+        lefttype, leftvalue = self.POP()
+        if lefttype == TYPE_NUMBER and righttype == TYPE_NUMBER:
+            self.PUSH((TYPE_BOOL, leftvalue < rightvalue))
+        else:
+            vm_error("Invalid types for LT", self.pc-1)
+
+    def GT(self,*args):
+        righttype, rightvalue = self.POP()
+        lefttype, leftvalue = self.POP()
+        if lefttype == TYPE_NUMBER and righttype == TYPE_NUMBER:
+            self.PUSH((TYPE_BOOL, leftvalue > rightvalue))
+        else:
+            vm_error("Invalid types for GT", self.pc-1)
+
+    def LE(self,*args):
+        righttype, rightvalue = self.POP()
+        lefttype, leftvalue = self.POP()
+        if lefttype == TYPE_NUMBER and righttype == TYPE_NUMBER:
+            self.PUSH((TYPE_BOOL, leftvalue <= rightvalue))
+        else:
+            vm_error("Invalid types for LE", self.pc-1)
+
+    def GE(self,*args):
+        righttype, rightvalue = self.POP()
+        lefttype, leftvalue = self.POP()
+        if lefttype == TYPE_NUMBER and righttype == TYPE_NUMBER:
+            self.PUSH((TYPE_BOOL, leftvalue >= rightvalue))
+        else:
+            vm_error("Invalid types for GE", self.pc-1)
+
+    def EQ(self,*args):
+        righttype, rightvalue = self.POP()
+        lefttype, leftvalue = self.POP()
+        if lefttype == TYPE_NUMBER and righttype == TYPE_NUMBER:
+            self.PUSH((TYPE_BOOL, leftvalue == rightvalue))
+        elif lefttype == TYPE_STRING and righttype == TYPE_STRING:
+            self.PUSH((TYPE_BOOL, leftvalue == rightvalue))
+        else:
+            vm_error("Invalid types for EQ", self.pc-1)
+
+    def NE(self,*args):
+        righttype, rightvalue = self.POP()
+        lefttype, leftvalue = self.POP()
+        if lefttype == TYPE_NUMBER and righttype == TYPE_NUMBER:
+            self.PUSH((TYPE_BOOL, leftvalue != rightvalue))
+        elif lefttype == TYPE_STRING and righttype == TYPE_STRING:
+            self.PUSH((TYPE_BOOL, leftvalue != rightvalue))
+        else:
+            vm_error("Invalid types for NE", self.pc-1)
