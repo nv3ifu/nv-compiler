@@ -8,8 +8,9 @@ TYPE_STRING = 'TYPE_STRING'  # String managed by the host language
 TYPE_BOOL = 'TYPE_BOOL'  # true | false
 
 class Symbol:
-    def __init__(self,name):
+    def __init__(self,name,depth = 0):
         self.name = name
+        self.depth = depth
 
 class Compiler:
     def __init__(self):
@@ -17,6 +18,10 @@ class Compiler:
         self.label_counter = 0
         self.globals =  []
         self.numglobals = 0
+        self.locals = []
+        self.numlocals = 0
+        self.scope_depth = 0
+
 
     def emit(self,op):
         self.code.append(op)
@@ -25,10 +30,29 @@ class Compiler:
         self.label_counter += 1
         return f'LABEL_{self.label_counter}'
 
+    def begin_block(self):
+        self.scope_depth += 1
+
+    def end_block(self):
+        self.scope_depth -= 1
+        i = self.numlocals - 1
+        while self.numlocals > 0 and self.locals[i].depth > self.scope_depth:
+            self.emit(('POP',))
+            self.locals.pop()
+            self.numlocals -= 1
+            i -= 1
+
     def get_symbol(self,name):
+        i = 0
+        for symbol in self.locals:
+            if symbol.name == name:
+                return (symbol,i)
+            i += 1
+        i = 0
         for symbol in self.globals:
             if symbol.name == name:
-                return symbol
+                return (symbol,i)
+            i += 1
         return None
 
     def compile(self,node):
@@ -117,29 +141,46 @@ class Compiler:
             exit_label = self.make_label()
             self.emit(('JMPZ',else_label))
             self.emit(('LABEL',then_label))
+            self.begin_block()
             self.compile(node.then_stmts)
+            self.end_block()
             self.emit(('JMP',exit_label))
             self.emit(('LABEL',else_label))
             if node.else_stmts:
+                self.begin_block()
                 self.compile(node.else_stmts)
+                self.end_block()
             self.emit(('LABEL',exit_label))
 
         if isinstance(node,Assignment):
             self.compile(node.right)
             symbol = self.get_symbol(node.left.name)
             if not symbol:
-                new_symbol = Symbol(node.left.name)
-                self.globals.append(new_symbol)
-                self.numglobals += 1
-                self.emit(('STORE_GLOBAL',new_symbol.name))
+                new_symbol = Symbol(node.left.name,self.scope_depth)
+                if self.scope_depth == 0:
+                    self.globals.append(new_symbol)
+                    self.emit(('STORE_GLOBAL',new_symbol.name))
+                    self.numglobals += 1
+                else:
+                    self.locals.append(new_symbol)
+                    self.emit(('STORE_LOCAL',self.numlocals))
+                    self.numlocals += 1
             else:
-                self.emit(('STORE_GLOBAL',symbol.name))
+                sym,slot = symbol
+                if sym.depth == 0:
+                    self.emit(('STORE_GLOBAL',sym.name))
+                else:
+                    self.emit(('STORE_LOCAL',slot))
 
         if isinstance(node,Identifier):
             symbol = self.get_symbol(node.name)
             if not symbol:
                 compile_error(f"Undefined variable {node.name}",node.line)
-            self.emit(('LOAD_GLOBAL',symbol.name))
+            sym,slot = symbol
+            if sym.depth == 0:
+                self.emit(('LOAD_GLOBAL',sym.name))
+            else:
+                self.emit(('LOAD_LOCAL',slot))
 
     def compile_code(self,node):
         self.emit(('START',))

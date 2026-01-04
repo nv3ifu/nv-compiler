@@ -67,6 +67,7 @@ class VM:
         self.stack = []
         self.pc = 0
         self.sp = -1
+        self.bp = 0  # Base pointer for local variables
         self.labels = {}
         self.globals = {}
         self.is_running = True
@@ -261,3 +262,19 @@ class VM:
 
     def STORE_GLOBAL(self,*args):
         self.globals[args[0]] = self.POP()
+
+    def LOAD_LOCAL(self,*args):
+        # Load local variable from stack at bp + slot
+        slot = args[0]
+        self.PUSH(self.stack[self.bp + slot])
+
+    def STORE_LOCAL(self,*args):
+        # Store value to stack at bp + slot
+        slot = args[0]
+        value = self.POP()
+        # Extend stack if necessary
+        target_index = self.bp + slot
+        while len(self.stack) <= target_index:
+            self.stack.append(None)
+            self.sp += 1
+        self.stack[target_index] = value

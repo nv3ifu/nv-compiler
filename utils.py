@@ -187,6 +187,9 @@ def print_code(code):
         elif opcode in ('LOAD_GLOBAL', 'STORE_GLOBAL'):
             # 全局变量指令，参数是变量名字符串
             print(f"{idx}     {opcode}  {op[1]}")
+        elif opcode in ('LOAD_LOCAL', 'STORE_LOCAL'):
+            # 局部变量指令，参数是 slot 整数
+            print(f"{idx}     {opcode}  {op[1]}")
         elif len(op) == 1:
             # 无参数指令，缩进显示
             print(f"{idx}     {opcode}")
