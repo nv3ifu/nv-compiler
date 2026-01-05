@@ -152,6 +152,21 @@ class Compiler:
                 self.end_block()
             self.emit(('LABEL',exit_label))
 
+        if isinstance(node,WhileStmt):
+            test_label = self.make_label()
+            body_label = self.make_label()
+            exit_label = self.make_label()
+            self.emit(('LABEL',test_label))
+            self.compile(node.test)
+            self.emit(('JMPZ',exit_label))
+            self.emit(('LABEL',body_label))
+            self.begin_block()
+            self.compile(node.body_stmts)
+            self.end_block()
+            self.emit(('JMP',test_label))
+            self.emit(('LABEL',exit_label))
+
+
         if isinstance(node,Assignment):
             self.compile(node.right)
             symbol = self.get_symbol(node.left.name)
