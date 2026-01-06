@@ -62,7 +62,7 @@ def print_tree(node, prefix="", is_last=True, label=""):
     connector = "└── " if is_last else "├── "
     label_str = f"{label}: " if label else ""
 
-    # 处理 None 节点
+
     if node is None:
         print(f"{prefix}{connector}{label_str}None")
         return
@@ -216,7 +216,7 @@ def generate_ast_image(node, filename="ast"):
     dot.attr('node', fontname='Consolas')
 
     def add_node(n, parent_id=None, edge_label=""):
-        # 处理 None 节点
+
         if n is None:
             node_id = str(id(n)) + "_none_" + str(parent_id)
             dot.node(node_id, "None", shape="ellipse", style="filled", fillcolor="lightgray")
@@ -297,7 +297,7 @@ def generate_ast_image(node, filename="ast"):
             dot.node(node_id, "RetStmt", shape="box", style="filled", fillcolor="salmon")
             add_node(n.expr, node_id, "expr")
         else:
-            # 处理未知节点类型
+
             dot.node(node_id, str(type(n).__name__), shape="box", style="filled", fillcolor="white")
 
         if parent_id:

@@ -257,8 +257,24 @@ class Compiler:
             new_func = Symbol(node.name,SYM_FUNC,0,len(node.params))
             self.functions.append(new_func)
 
-    def compile_code(self,node):
+    def collect_globals(self,node):
+        if isinstance(node,Stmts):
+            for stmt in node.stmts:
+                self.collect_globals(stmt)
+        elif isinstance(node,Assignment):
+
+            if self.scope_depth == 0:
+                name = node.left.name
+                if not self.get_var_symbol(name) and not self.get_func_symbol(name):
+                    new_symbol = Symbol(name, SYM_VAR, 0)
+                    self.globals.append(new_symbol)
+
+    def collect_symbols(self,node):
         self.collect_functions(node)
+        self.collect_globals(node)
+
+    def compile_code(self,node):
+        self.collect_symbols(node)
         self.emit(('START',))
         self.compile(node)
         self.emit(('HALT',))
