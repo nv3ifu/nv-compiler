@@ -194,6 +194,7 @@ class Interpreter:
                     self.interpret(func_decl.body_stmts,new_env)
                 except ReturnException as e:
                     return e.args[0]
+                return (TYPE_BOOL, False)
 
         elif isinstance(node, FuncDecl):
             env.set_func(node.name,(node,env))

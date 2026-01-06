@@ -1,3 +1,5 @@
+from model import FuncCallStmt
+from model import FuncDecl
 from model import LogicalOp
 from model import *
 from tokens import *
@@ -7,10 +9,15 @@ TYPE_NUMBER = 'TYPE_NUMBER'  # Default to 64-bit float
 TYPE_STRING = 'TYPE_STRING'  # String managed by the host language
 TYPE_BOOL = 'TYPE_BOOL'  # true | false
 
+SYM_VAR = 'SYM_VAR'
+SYM_FUNC = 'SYM_FUNC'
+
 class Symbol:
-    def __init__(self,name,depth = 0):
+    def __init__(self,name,symtype = SYM_VAR,depth = 0,arity = 0):
         self.name = name
+        self.symtype = symtype
         self.depth = depth
+        self.arity = arity
 
 class Compiler:
     def __init__(self):
@@ -19,7 +26,7 @@ class Compiler:
         self.globals =  []
         self.numglobals = 0
         self.locals = []
-        self.numlocals = 0
+        self.functions = []
         self.scope_depth = 0
 
 
@@ -35,24 +42,24 @@ class Compiler:
 
     def end_block(self):
         self.scope_depth -= 1
-        i = self.numlocals - 1
-        while self.numlocals > 0 and self.locals[i].depth > self.scope_depth:
+        while len(self.locals) > 0 and self.locals[-1].depth > self.scope_depth:
             self.emit(('POP',))
             self.locals.pop()
-            self.numlocals -= 1
-            i -= 1
 
-    def get_symbol(self,name):
-        i = 0
-        for symbol in self.locals:
+    def get_func_symbol(self,name):
+        for symbol in self.functions:
             if symbol.name == name:
-                return (symbol,i)
-            i += 1
-        i = 0
-        for symbol in self.globals:
+                return symbol
+        return None
+
+
+    def get_var_symbol(self,name):
+        for i in range(len(self.locals) - 1, -1, -1):
+            if self.locals[i].name == name:
+                return (self.locals[i], i)
+        for i, symbol in enumerate(self.globals):
             if symbol.name == name:
-                return (symbol,i)
-            i += 1
+                return (symbol, i)
         return None
 
     def compile(self,node):
@@ -169,17 +176,16 @@ class Compiler:
 
         if isinstance(node,Assignment):
             self.compile(node.right)
-            symbol = self.get_symbol(node.left.name)
+            symbol = self.get_var_symbol(node.left.name)
             if not symbol:
-                new_symbol = Symbol(node.left.name,self.scope_depth)
+                new_symbol = Symbol(node.left.name,SYM_VAR,self.scope_depth)
                 if self.scope_depth == 0:
                     self.globals.append(new_symbol)
                     self.emit(('STORE_GLOBAL',new_symbol.name))
                     self.numglobals += 1
                 else:
+                    self.emit(('STORE_LOCAL',len(self.locals)))
                     self.locals.append(new_symbol)
-                    self.emit(('STORE_LOCAL',self.numlocals))
-                    self.numlocals += 1
             else:
                 sym,slot = symbol
                 if sym.depth == 0:
@@ -188,7 +194,7 @@ class Compiler:
                     self.emit(('STORE_LOCAL',slot))
 
         if isinstance(node,Identifier):
-            symbol = self.get_symbol(node.name)
+            symbol = self.get_var_symbol(node.name)
             if not symbol:
                 compile_error(f"Undefined variable {node.name}",node.line)
             sym,slot = symbol
@@ -197,7 +203,62 @@ class Compiler:
             else:
                 self.emit(('LOAD_LOCAL',slot))
 
+        if isinstance(node,LocalStmt):
+            self.compile(node.expr)
+            new_symbol = Symbol(node.ident,SYM_VAR,self.scope_depth)
+            self.emit(('STORE_LOCAL',len(self.locals)))
+            self.locals.append(new_symbol)
+        
+        if isinstance(node,FuncDecl):
+            func = self.get_func_symbol(node.name)
+            if func:
+                end_label = self.make_label()
+                self.emit(('JMP',end_label))
+                self.emit(('LABEL',func.name))
+                self.begin_block()
+                for param in node.params:
+                    new_symbol = Symbol(param.name,SYM_VAR,self.scope_depth)
+                    self.locals.append(new_symbol)
+                self.compile(node.body_stmts)
+                self.end_block()
+                self.emit(('PUSH',(TYPE_BOOL,False)))
+                self.emit(('RET',))
+                self.emit(('LABEL',end_label))
+
+
+        if isinstance(node,FuncCall):
+            func = self.get_func_symbol(node.name)
+            if not func:
+                compile_error(f"Undefined function {node.name}",node.line)
+            if func.arity != len(node.args):
+                compile_error(f"Function {node.name} expected {func.arity} arguments, got {len(node.args)}",node.line)
+            for arg in node.args:
+                self.compile(arg)
+            self.emit(('CALL',func.name,len(node.args)))
+
+        if isinstance(node,FuncCallStmt):
+            self.compile(node.expr)
+            self.emit(('POP',))
+
+        if isinstance(node,RetStmt):
+            if node.expr:
+                self.compile(node.expr)
+            else:
+                self.emit(('PUSH',(TYPE_BOOL,False)))
+            self.emit(('RET',))
+
+    def collect_functions(self,node):
+        if isinstance(node,Stmts):
+            for stmt in node.stmts:
+                self.collect_functions(stmt)
+        elif isinstance(node,FuncDecl):
+            if self.get_func_symbol(node.name) or self.get_var_symbol(node.name):
+                compile_error(f"Function/Variable {node.name} already defined",node.line)
+            new_func = Symbol(node.name,SYM_FUNC,0,len(node.params))
+            self.functions.append(new_func)
+
     def compile_code(self,node):
+        self.collect_functions(node)
         self.emit(('START',))
         self.compile(node)
         self.emit(('HALT',))

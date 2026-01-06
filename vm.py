@@ -62,14 +62,21 @@ TYPE_NUMBER = 'TYPE_NUMBER'  # Default to 64-bit float
 TYPE_STRING = 'TYPE_STRING'  # String managed by the host language
 TYPE_BOOL = 'TYPE_BOOL'  # true | false
 
+class Frame:
+    def __init__(self,name,ret_pc,frame_pointer):
+        self.name = name
+        self.ret_pc = ret_pc
+        self.frame_pointer = frame_pointer
+
 class VM:
     def __init__(self):
         self.stack = []
         self.pc = 0
         self.sp = -1
-        self.bp = 0  # Base pointer for local variables
+        self.bp = 0  
         self.labels = {}
         self.globals = {}
+        self.frames = []
         self.is_running = True
 
     def create_label_table(self,instructions):
@@ -252,6 +259,23 @@ class VM:
     def JMP(self,*args):
         self.pc = self.labels[args[0]]
 
+    def CALL(self,*args):
+        func_name = args[0]
+        arg_count = args[1] if len(args) > 1 else 0
+        new_frame = Frame(func_name, self.pc, self.bp)
+        self.frames.append(new_frame)
+        self.bp = self.sp - arg_count + 1
+        self.pc = self.labels[func_name]
+
+    def RET(self,*args):
+        return_value = self.POP()
+        frame = self.frames.pop()
+        while self.sp >= self.bp:
+            self.POP()
+        self.bp = frame.frame_pointer
+        self.pc = frame.ret_pc
+        self.PUSH(return_value)
+ 
     def JMPZ(self,*args):
         vatype, val = self.POP()    
         if vatype == TYPE_BOOL and val == False:

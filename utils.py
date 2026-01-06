@@ -188,8 +188,12 @@ def print_code(code):
             # 全局变量指令，参数是变量名字符串
             print(f"{idx}     {opcode}  {op[1]}")
         elif opcode in ('LOAD_LOCAL', 'STORE_LOCAL'):
-            # 局部变量指令，参数是 slot 整数
             print(f"{idx}     {opcode}  {op[1]}")
+        elif opcode == 'CALL':
+            arg_count = op[2] if len(op) > 2 else 0
+            print(f"{idx}     {opcode}  {op[1]}({arg_count})")
+        elif opcode == 'RET':
+            print(f"{idx}     {opcode}")
         elif len(op) == 1:
             # 无参数指令，缩进显示
             print(f"{idx}     {opcode}")

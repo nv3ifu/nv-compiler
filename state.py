@@ -11,6 +11,14 @@ class Environment:
                 return value
             self = self.parent
         return None
+
+    def _chain(self):
+        c = self
+        res = []
+        while c:
+            res.append(c)
+            c = c.parent
+        return res
     def set_var(self,name,value):
         original_env = self
         while self:
