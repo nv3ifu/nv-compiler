@@ -173,7 +173,42 @@ class Compiler:
             self.emit(('JMP',test_label))
             self.emit(('LABEL',exit_label))
 
-
+        if isinstance(node,ForStmt):
+            test_label = self.make_label()
+            body_label = self.make_label()
+            exit_label = self.make_label()
+            step_label = self.make_label()
+            
+            varname = node.ident.name
+            new_symbol = Symbol(varname, SYM_VAR, self.scope_depth)
+            if self.scope_depth == 0:
+                self.globals.append(new_symbol)
+            
+            self.compile(node.start)
+            self.emit(('STORE_GLOBAL', varname))
+            
+            self.emit(('LABEL', test_label))
+            self.emit(('LOAD_GLOBAL', varname))
+            self.compile(node.end)
+            self.emit(('LT',))
+            self.emit(('JMPZ', exit_label))
+            
+            self.emit(('LABEL', body_label))
+            self.begin_block()
+            self.compile(node.body_stmts)
+            self.end_block()
+            
+            self.emit(('LABEL', step_label))
+            self.emit(('LOAD_GLOBAL', varname))
+            if node.step:
+                self.compile(node.step)
+            else:
+                self.emit(('PUSH', (TYPE_NUMBER, 1.0)))
+            self.emit(('ADD',))
+            self.emit(('STORE_GLOBAL', varname))
+            self.emit(('JMP', test_label))
+            
+            self.emit(('LABEL', exit_label))
         if isinstance(node,Assignment):
             self.compile(node.right)
             symbol = self.get_var_symbol(node.left.name)

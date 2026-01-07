@@ -1,1 +1,23 @@
-a:=1+3
+-- Test ForStmt
+println("Testing for loop:")
+for i := 1, 5 do
+    println(i)
+end
+
+-- Test for with step
+println("Testing for with step 2:")
+for j := 0, 10, 2 do
+    println(j)
+end
+
+-- Test string comparison
+println("Testing string comparison:")
+a := "apple"
+b := "banana"
+if a < b then
+    println("apple < banana: true")
+end
+
+if b > a then
+    println("banana > apple: true")
+end

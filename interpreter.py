@@ -165,7 +165,7 @@ class Interpreter:
             itype,ival = self.interpret(node.start,new_env)
             endtype,endval = self.interpret(node.end,new_env)
             if ival<endval:
-                if node.step == Node:
+                if node.step is None:
                     stepval = 1
                     steptype = TYPE_NUMBER
                 else:

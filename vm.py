@@ -205,6 +205,8 @@ class VM:
         lefttype, leftvalue = self.POP()
         if lefttype == TYPE_NUMBER and righttype == TYPE_NUMBER:
             self.PUSH((TYPE_BOOL, leftvalue < rightvalue))
+        elif lefttype == TYPE_STRING and righttype == TYPE_STRING:
+            self.PUSH((TYPE_BOOL, leftvalue < rightvalue))
         else:
             vm_error("Invalid types for LT", self.pc-1)
 
@@ -212,6 +214,8 @@ class VM:
         righttype, rightvalue = self.POP()
         lefttype, leftvalue = self.POP()
         if lefttype == TYPE_NUMBER and righttype == TYPE_NUMBER:
+            self.PUSH((TYPE_BOOL, leftvalue > rightvalue))
+        elif lefttype == TYPE_STRING and righttype == TYPE_STRING:
             self.PUSH((TYPE_BOOL, leftvalue > rightvalue))
         else:
             vm_error("Invalid types for GT", self.pc-1)
@@ -221,6 +225,8 @@ class VM:
         lefttype, leftvalue = self.POP()
         if lefttype == TYPE_NUMBER and righttype == TYPE_NUMBER:
             self.PUSH((TYPE_BOOL, leftvalue <= rightvalue))
+        elif lefttype == TYPE_STRING and righttype == TYPE_STRING:
+            self.PUSH((TYPE_BOOL, leftvalue <= rightvalue))
         else:
             vm_error("Invalid types for LE", self.pc-1)
 
@@ -228,6 +234,8 @@ class VM:
         righttype, rightvalue = self.POP()
         lefttype, leftvalue = self.POP()
         if lefttype == TYPE_NUMBER and righttype == TYPE_NUMBER:
+            self.PUSH((TYPE_BOOL, leftvalue >= rightvalue))
+        elif lefttype == TYPE_STRING and righttype == TYPE_STRING:
             self.PUSH((TYPE_BOOL, leftvalue >= rightvalue))
         else:
             vm_error("Invalid types for GE", self.pc-1)
