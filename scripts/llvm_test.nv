@@ -1,0 +1,43 @@
+-- Test ForStmt
+println("Testing for loop:")
+for i := 1, 5 do
+    println(i)
+end
+
+-- Test for with step
+println("Testing for with step 2:")
+for j := 0, 10, 2 do
+    println(j)
+end
+
+-- Test arithmetic
+println("Testing arithmetic:")
+x := 10 + 5 * 2
+println(x)
+
+-- Test if
+println("Testing if:")
+if x > 15 then
+    println("x > 15: true")
+else
+    println("x > 15: false")
+end
+
+-- Test while
+println("Testing while:")
+n := 3
+while n > 0 do
+    println(n)
+    n := n - 1
+end
+
+-- Test function
+func add(a, b)
+    ret a + b
+end
+
+println("Testing function:")
+result := add(3, 4)
+println(result)
+
+println("Done!")
