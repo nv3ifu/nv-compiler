@@ -4,7 +4,8 @@
 
 ## Pinky语言语法
 
-Pinky语言的语法介绍可以通过以下链接访问：[Pinky语言语法](https://pinky-lang.org/)。支持以下控制结构：
+Pinky语言的语法介绍可以通过以下链接访问：[Pinky语言语法](https://pinky-lang.org/)。
+支持以下控制结构：
 
 - **条件语句**：`if`，`else`
 - **循环结构**：`for`，`while`
@@ -22,6 +23,9 @@ Pinky语言的语法介绍可以通过以下链接访问：[Pinky语言语法](h
 
 3. **LLVM**：
    - 生成与Pinky对应的原生机器码，以便在CPU上直接执行。
+  
+## 优化
+   - 支持AST常量折叠。
 
 ## 可视化网站
 
