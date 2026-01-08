@@ -5,6 +5,7 @@
 ## Pinky语言语法
 
 Pinky语言的语法介绍可以通过以下链接访问：[Pinky语言语法](https://pinky-lang.org/)。
+
 支持以下控制结构：
 
 - **条件语句**：`if`，`else`
@@ -22,7 +23,7 @@ Pinky语言的语法介绍可以通过以下链接访问：[Pinky语言语法](h
    - 编译为字节码，由栈式虚拟机执行。
 
 3. **LLVM**：
-   - 生成与Pinky对应的LLVM IR,编译为机器码，在CPU上执行。
+   - 生成与Pinky对应的LLVM IR，编译为机器码，在CPU上执行。
   
 ## 优化
    - 支持AST常量折叠。
